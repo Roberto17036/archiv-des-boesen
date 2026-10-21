@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Deine persönliche Firebase-Cloud-Datenbank-URL
     const FIREBASE_URL = 'https://firebasedatabase.app';
 
-    // HIER DEIN PASSWORT ANPASSEN:
-    const LOESCH_PASSWORT = 'wetterfrosch';
+    // Dein Passwort zum Löschen
+    const LOESCH_PASSWORT = 'geheim123';
 
     // 1. Funktion: Daten aus der weltweiten Cloud-Datenbank laden
     function datenLaden() {
@@ -96,5 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Beim Start der Seite direkt die weltweiten Daten laden
+    datenLaden();
+});
+
     datenLaden();
 });
