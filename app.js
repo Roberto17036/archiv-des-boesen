@@ -1,13 +1,40 @@
-document.addEventListener('DOMContentLoaded', () => {
+// Funktion, um Skripte dynamisch und in der richtigen Reihenfolge zu laden
+function scriptLaden(url) {
+    return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
+}
+
+// Zuerst die Firebase-Bibliotheken nacheinander laden
+Promise.all([
+    scriptLaden("https://gstatic.com")
+])
+.then(() => {
+    // Wenn die App-Basis geladen ist, die Datenbank-Erweiterung laden
+    return scriptLaden("https://gstatic.com");
+})
+.then(() => {
+    // Erst JETZT, wenn alles da ist, startet die eigentliche Logik
+    console.log("Firebase erfolgreich im Hintergrund geladen!");
+    datenbankStarten();
+})
+.catch(error => {
+    console.error("Fehler beim Laden der Firebase-Skripte:", error);
+});
+
+// Die Hauptfunktion für deine Webseite
+function datenbankStarten() {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
-
-    // Das Passwort zum Löschen
     const LOESCH_PASSWORT = 'geheim123';
 
     // Offizielle Firebase-Konfiguration
     const firebaseConfig = {
-        databaseURL: "https://archiv-des-boesen-default-rtdb.europe-west1.firebasedatabase.app/"
+        databaseURL: "https://firebasedatabase.app"
     };
 
     // Firebase initialisieren
@@ -15,9 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const database = firebase.database();
     const eintraegeRef = database.ref('eintraege');
 
-    // 1. Funktion: Live-Daten aus Firebase empfangen
+    // 1. Live-Daten aus Firebase empfangen
     eintraegeRef.on('value', (snapshot) => {
-        listenElement.innerHTML = ''; // Liste leeren
+        listenElement.innerHTML = ''; 
         const data = snapshot.val();
 
         if (!data) {
@@ -25,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Einträge darstellen
         Object.keys(data).forEach(key => {
             const eintrag = data[key];
             const li = document.createElement('li');
@@ -39,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
             listenElement.appendChild(li);
         });
 
-        // Lösch-Buttons aktivieren
         document.querySelectorAll('.btn-loeschen').forEach(button => {
             button.addEventListener('click', (e) => {
                 const keyZumLoeschen = e.target.getAttribute('data-key');
@@ -54,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 2. Funktion: Eintrag weltweit in die Cloud speichern
+    // 2. Eintrag speichern
     form.addEventListener('submit', (event) => {
         event.preventDefault();
 
@@ -67,7 +92,6 @@ document.addEventListener('DOMContentLoaded', () => {
             datum: new Date().toLocaleDateString('de-DE')
         };
 
-        // Über das offizielle SDK in Firebase speichern
         eintraegeRef.push(neuerEintrag)
             .then(() => {
                 titelInput.value = '';
@@ -75,4 +99,4 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => console.error('Fehler beim Speichern:', error));
     });
-});
+}
