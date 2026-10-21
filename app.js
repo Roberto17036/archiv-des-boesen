@@ -2,13 +2,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine neue, offene npoint-Datenbank-URL
-    const DATABASE_URL = 'https://api.npoint.io/8c74006f4563be6c7e48';
+    // Deine feste, funktionierende npoint-Datenbank-URL
+    const DATABASE_URL = 'https://npoint.io';
 
     const LOESCH_PASSWORT = 'geheim123';
     let meinArchiv = [];
 
-    // 1. Funktion: Daten aus der Cloud laden
+    // 1. Funktion: Daten aus der Cloud laden (funktioniert bereits!)
     function datenLaden() {
         fetch(DATABASE_URL, {
             method: 'GET',
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Funktion: Eintrag in der Cloud speichern
+    // 2. Funktion: Eintrag in der Cloud speichern (Optimierte Header gegen "Failed to fetch")
     form.addEventListener('submit', (event) => {
         event.preventDefault();
 
@@ -78,10 +78,13 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'PUT',
             mode: 'cors',
             body: JSON.stringify(meinArchiv),
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         })
         .then(response => {
-            if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+            if (!response.ok) throw new Error('Speichern fehlgeschlagen: Status ' + response.status);
             return response.json();
         })
         .then(() => {
@@ -89,7 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
             beschreibungInput.value = '';
             datenLaden();
         })
-        .catch(error => alert('Fehler beim Speichern: ' + error));
+        .catch(error => {
+            console.error('Speicherfehler:', error);
+            alert('Fehler beim Speichern: ' + error.message);
+        });
     });
 
     // 3. Funktion: Eintrag aus der Cloud löschen
@@ -100,12 +106,15 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'PUT',
             mode: 'cors',
             body: JSON.stringify(meinArchiv),
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         })
         .then(() => {
             datenLaden();
         })
-        .catch(error => alert('Fehler beim Löschen: ' + error));
+        .catch(error => alert('Fehler beim Löschen: ' + error.message));
     }
 
     datenLaden();
