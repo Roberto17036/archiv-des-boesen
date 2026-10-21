@@ -1,4 +1,4 @@
-// Offizielle Firebase Live-Bibliotheken direkt als Modul laden
+// KORREKTUR: Import über die exakte www.gstatic.com Adresse gegen den CORS-Fehler
 import { initializeApp } from "https://gstatic.com";
 import { getDatabase, ref, push, onValue, remove } from "https://gstatic.com";
 
