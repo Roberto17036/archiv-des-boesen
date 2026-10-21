@@ -4,8 +4,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Deine feste jsonbin.io Cloud-Datenbank
     const BIN_ID = '6ad88109ffd5d160537ec371';
-    // KORREKTUR: Die Dollarzeichen werden hier sauber und unmaskiert als reiner Text übergeben
-    const MASTER_KEY = '\$2a\$10\$j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2';
+    
+    // HIER WIRD DER KEY ABSOLUT BACKSLASH-FREI ZUSAMMENGESETZT
+    const MASTER_KEY = "\$" + "2a" + "" + "10" + "" + "j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2";
 
     const DATABASE_URL = `https://jsonbin.io{BIN_ID}`;
     const LOESCH_PASSWORT = 'geheim123';
@@ -98,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => alert('Fehler beim Speichern: ' + error));
     });
 
-    // 3. Funktion: Eintrag aus der Cloud永久 löschen
+    // 3. Funktion: Eintrag aus der Cloud löschen
     function eintragLoeschen(index) {
         meinArchiv.splice(index, 1);
 
