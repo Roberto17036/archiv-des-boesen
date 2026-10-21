@@ -53,15 +53,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
+                if (Array.isArray(data)) {
                     meinArchiv = data;
                     localStorage.setItem('archivDatenLocal', JSON.stringify(meinArchiv));
                 }
                 ansichtAktualisieren();
             })
             .catch(error => {
-                console.log('Cloud blockiert (Nutze lokalen Speicher):', error);
-                // Wenn die Cloud blockiert, arbeiten wir einfach mit den lokalen Daten weiter
+                console.log('Cloud-Abruf im Hintergrund (Nutze lokalen Speicher):', error);
                 ansichtAktualisieren();
             });
     }
@@ -118,4 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Direkt beim Start laden
     datenLaden();
+
+    // AUTOMATISCHES LADEN: Alle 10.000 Millisekunden (10 Sekunden) die Cloud prüfen
+    setInterval(datenLaden, 10000);
 });
