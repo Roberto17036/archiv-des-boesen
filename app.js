@@ -98,6 +98,3 @@ document.addEventListener('DOMContentLoaded', () => {
     // Beim Start der Seite direkt die weltweiten Daten laden
     datenLaden();
 });
-
-    datenLaden();
-});
