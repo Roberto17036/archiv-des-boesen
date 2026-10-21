@@ -5,6 +5,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Deine persönliche Firebase-Cloud-Datenbank-URL
     const FIREBASE_URL = 'https://firebasedatabase.app';
 
+    // HIER DEIN PASSWORT ANPASSEN:
+    const LOESCH_PASSWORT = 'wetterfrosch';
+
     // 1. Funktion: Daten aus der weltweiten Cloud-Datenbank laden
     function datenLaden() {
         fetch(FIREBASE_URL)
@@ -35,7 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('.btn-loeschen').forEach(button => {
                     button.addEventListener('click', (e) => {
                         const keyZumLoeschen = e.target.getAttribute('data-key');
-                        eintragLoeschen(keyZumLoeschen);
+                        
+                        // Passwort-Abfrage beim Klicken auf Löschen
+                        const pwEingabe = prompt('Bitte gib das Administrator-Passwort ein, um diesen Eintrag zu löschen:');
+                        
+                        if (pwEingabe === LOESCH_PASSWORT) {
+                            eintragLoeschen(keyZumLoeschen);
+                        } else if (pwEingabe !== null) {
+                            alert('Falsches Passwort! Der Eintrag wurde nicht gelöscht.');
+                        }
                     });
                 });
             })
@@ -73,7 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Funktion: Eintrag aus der Cloud löschen
     function eintragLoeschen(key) {
-        // Die genaue URL des einzelnen Eintrags zum Löschen bestimmen
         const loeschUrl = FIREBASE_URL.replace('.json', `/${key}.json`);
 
         fetch(loeschUrl, {
@@ -87,6 +97,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Beim Start der Seite direkt die weltweiten Daten laden
     datenLaden();
-});
-
 });
