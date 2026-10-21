@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const listenElement = document.getElementById('archiv-liste');
 
     // Deine feste, blockierungsfreie npoint-Datenbank-URL
-    const DATABASE_URL = 'https://npoint.io';
+    const DATABASE_URL = 'https://api.npoint.io/f309c81a5994fed510c7';
 
     const LOESCH_PASSWORT = 'geheim123';
     let meinArchiv = [];
 
-    // 1. Funktion: Daten aus der weltweiten npoint-Cloud laden
+    // 1. Funktion: Daten aus der Cloud laden
     function datenLaden() {
         fetch(DATABASE_URL)
             .then(response => {
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return response.json();
             })
             .then(data => {
-                // Falls die Datenbank leer ist oder kein Array zurückgibt, leeres Array nutzen
+                // npoint liefert das Array aus der Datei
                 meinArchiv = Array.isArray(data) ? data : [];
                 listenElement.innerHTML = ''; 
 
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
-    // 2. Funktion: Eintrag in der Cloud speichern
+    // 2. Funktion: Eintrag in der Cloud speichern (npoint benötigt PUT zum Updaten des Arrays)
     form.addEventListener('submit', (event) => {
         event.preventDefault();
 
@@ -71,19 +71,23 @@ document.addEventListener('DOMContentLoaded', () => {
             datum: new Date().toLocaleDateString('de-DE')
         };
 
-        // Eintrag lokal hinzufügen
+        // Eintrag zur lokalen Liste hinzufügen
         meinArchiv.push(neuerEintrag);
 
-        // Die gesamte Liste aktualisiert zurück an npoint senden (POST)
+        // Die gesamte Liste per PUT an npoint senden
         fetch(DATABASE_URL, {
-            method: 'POST',
+            method: 'PUT',
             body: JSON.stringify(meinArchiv),
             headers: { 'Content-Type': 'application/json' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Speichern fehlgeschlagen');
+            return response.json();
         })
         .then(() => {
             titelInput.value = '';
             beschreibungInput.value = '';
-            datenLaden(); // Ansicht für alle weltweit aktualisieren
+            datenLaden(); // Ansicht weltweit aktualisieren
         })
         .catch(error => alert('Fehler beim Speichern: ' + error));
     });
@@ -93,9 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Eintrag aus dem Array entfernen
         meinArchiv.splice(index, 1);
 
-        // Aktualisierte Liste zurück an die Cloud senden
+        // Aktualisierte Liste per PUT zurück an npoint senden
         fetch(DATABASE_URL, {
-            method: 'POST',
+            method: 'PUT',
             body: JSON.stringify(meinArchiv),
             headers: { 'Content-Type': 'application/json' }
         })
