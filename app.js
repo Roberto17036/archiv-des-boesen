@@ -2,13 +2,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine funktionierende jsonbin.io Cloud-Datenbank
+    // Deine feste jsonbin.io Cloud-Datenbank
     const BIN_ID = '6ad88424ac6210605a451855';
     
-    // Hier ist dein API-Schlüssel wieder drin, sicher verpackt ohne Maskierungsfehler
-    const KEY_PART1 = '\$2a\$10\$';
-    const KEY_PART2 = 'j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2';
-    const MASTER_KEY = KEY_PART1 + KEY_PART2;
+    // Absolut sichere Generierung des Schlüssels ohne Dollar-Zeichen-Kopierfehler
+    const dollar = String.fromCharCode(36); 
+    const MASTER_KEY = dollar + "2a" + dollar + "10" + dollar + "j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2";
 
     const DATABASE_URL = `https://jsonbin.io{BIN_ID}`;
     const LOESCH_PASSWORT = 'geheim123';
