@@ -2,14 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine npoint-URL
+    // Deine feste npoint-Datenbank-URL (mit deiner aktuellen ID!)
     const DATABASE_URL = 'https://npoint.io';
     const LOESCH_PASSWORT = 'geheim123';
     
-    // Fallback: Daten zuerst lokal laden, falls das Internet blockiert
+    // Lokaler Speicher als Sicherheitsnetz
     let meinArchiv = JSON.parse(localStorage.getItem('archivDatenLocal')) || [];
 
-    // 1. Funktion: Daten darstellen
+    // 1. Funktion: Daten auf dem Bildschirm anzeigen
     function ansichtAktualisieren() {
         listenElement.innerHTML = ''; 
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Funktion: Daten aus der Cloud laden (mit automatischem Fallback)
+    // 2. Funktion: Daten aus der Cloud laden
     function datenLaden() {
         fetch(DATABASE_URL)
             .then(response => {
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ansichtAktualisieren();
             })
             .catch(error => {
-                console.log('Cloud-Abruf im Hintergrund (Nutze lokalen Speicher):', error);
+                console.log('Hintergrund-Laden (Nutze lokalen Speicher):', error);
                 ansichtAktualisieren();
             });
     }
@@ -80,23 +80,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         meinArchiv.push(neuerEintrag);
         
-        // Immer lokal sichern
+        // Sofort lokal anzeigen und sichern
         localStorage.setItem('archivDatenLocal', JSON.stringify(meinArchiv));
         ansichtAktualisieren();
 
-        // Im Hintergrund versuchen, die Cloud zu aktualisieren
+        // An die npoint-Cloud senden mit vereinfachten Headern gegen CORS-Fehler
         fetch(DATABASE_URL, {
             method: 'PUT',
-            body: JSON.stringify(meinArchiv),
-            headers: { 'Content-Type': 'application/json' }
+            body: JSON.stringify(meinArchiv)
         })
         .then(() => {
             titelInput.value = '';
             beschreibungInput.value = '';
+            datenLaden(); // Synchronisieren
         })
-        .catch(err => console.log('Synchronisierung verschoben (Lokal gespeichert).'));
+        .catch(err => console.log('Lokal gesichert. Cloud-Sync folgt im Hintergrund.'));
         
-        // Eingabefelder leeren
         titelInput.value = '';
         beschreibungInput.value = '';
     });
@@ -107,17 +106,17 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('archivDatenLocal', JSON.stringify(meinArchiv));
         ansichtAktualisieren();
 
-        // Im Hintergrund an Cloud senden
         fetch(DATABASE_URL, {
             method: 'PUT',
-            body: JSON.stringify(meinArchiv),
-            headers: { 'Content-Type': 'application/json' }
-        }).catch(err => console.log('Löschen in der Cloud verschoben.'));
+            body: JSON.stringify(meinArchiv)
+        })
+        .then(() => datenLaden())
+        .catch(err => console.log('Löschen in der Cloud verschoben.'));
     }
 
-    // Direkt beim Start laden
+    // Start
     datenLaden();
 
-    // AUTOMATISCHES LADEN: Alle 10.000 Millisekunden (10 Sekunden) die Cloud prüfen
+    // Alle 10 Sekunden automatisch im Hintergrund aktualisieren
     setInterval(datenLaden, 10000);
 });
