@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine persönliche Firebase-Cloud-Datenbank-URL
+    // Korrigierte europäische Firebase-URL (inklusive Regionskennung europe-west1)
     const FIREBASE_URL = 'https://firebasedatabase.app';
 
     // Dein Passwort zum Löschen
