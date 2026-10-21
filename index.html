@@ -9,7 +9,44 @@
 <body>
 
     <div class="container">
+        <h1>Archiv des Bösen</h1><!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archiv des Bösen - Datenbank</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
         <h1>Archiv des Bösen</h1>
+        <p class="subtitle">Eine erweiterbare Datenbank</p>
+
+        <!-- Formular zum Hinzufügen von Einträgen -->
+        <form id="archiv-form">
+            <div class="form-group">
+                <label for="titel">Name / Titel:</label>
+                <input type="text" id="titel" placeholder="Was soll archiviert werden?" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="beschreibung">Beschreibung / Details:</label>
+                <textarea id="beschreibung" rows="4" placeholder="Nähere Details hier eintragen..." required></textarea>
+            </div>
+            
+            <button type="submit" id="btn-speichern">Eintrag speichern</button>
+        </form>
+
+        <h2>Archivierte Einträge</h2>
+        <!-- Hier zeigt das JavaScript die Einträge an -->
+        <ul id="archiv-liste"></ul>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
+
         <p class="subtitle">Eine erweiterbare Live-Datenbank</p>
 
         <!-- Formular zum Hinzufügen von Einträgen -->
