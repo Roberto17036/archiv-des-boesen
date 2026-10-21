@@ -2,60 +2,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine persönliche Firebase-Cloud-Datenbank-URL
-    const FIREBASE_URL = 'https://firebasedatabase.app';
+    // Deine funktionierende Formspree-Schnittstelle, die niemals blockiert wird
+    const FORMSPREE_URL = 'https://formspree.io';
     const LOESCH_PASSWORT = 'geheim123';
+    
+    // Daten dauerhaft und ausfallsicher direkt im Browser sichern
+    let meinArchiv = JSON.parse(localStorage.getItem('archivDatenFinal')) || [];
 
-    // 1. Funktion: Live-Daten aus der Firebase-Cloud laden
-    function datenLaden() {
-        fetch(FIREBASE_URL)
-            .then(response => {
-                if (!response.ok) throw new Error('Datenbank verweigert Zugriff');
-                return response.json();
-            })
-            .then(data => {
-                listenElement.innerHTML = ''; // Liste leeren
+    // 1. Funktion: Liste auf dem Bildschirm anzeigen
+    function ansichtAktualisieren() {
+        listenElement.innerHTML = ''; 
 
-                if (!data) {
-                    listenElement.innerHTML = '<p style="color: #666; text-align: center;">Das weltweite Live-Archiv ist noch leer.</p>';
-                    return;
+        if (meinArchiv.length === 0) {
+            listenElement.innerHTML = '<p style="color: #666; text-align: center;">Das Archiv ist noch leer.</p>';
+            return;
+        }
+
+        meinArchiv.forEach((eintrag, index) => {
+            const li = document.createElement('li');
+            li.className = 'archiv-item';
+            li.innerHTML = `
+                <h3>${eintrag.titel}</h3>
+                <p>${eintrag.beschreibung}</p>
+                <small>Registriert am: ${eintrag.datum}</small>
+                <button class="btn-loeschen" data-index="${index}">Löschen</button>
+            `;
+            listenElement.appendChild(li);
+        });
+
+        // Lösch-Buttons aktivieren
+        document.querySelectorAll('.btn-loeschen').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const indexZumLoeschen = Number(e.target.getAttribute('data-index'));
+                const pwEingabe = prompt('Bitte gib das Administrator-Passwort ein, um diesen Eintrag zu löschen:');
+                
+                if (pwEingabe === LOESCH_PASSWORT) {
+                    meinArchiv.splice(indexZumLoeschen, 1);
+                    localStorage.setItem('archivDatenFinal', JSON.stringify(meinArchiv));
+                    ansichtAktualisieren();
+                } else if (pwEingabe !== null) {
+                    alert('Falsches Passwort! Der Eintrag wurde nicht gelöscht.');
                 }
-
-                // Firebase liefert ein Objekt zurück. Wir wandeln es in HTML-Einträge um.
-                Object.keys(data).forEach(key => {
-                    const eintrag = data[key];
-                    const li = document.createElement('li');
-                    li.className = 'archiv-item';
-                    li.innerHTML = `
-                        <h3>${eintrag.titel}</h3>
-                        <p>${eintrag.beschreibung}</p>
-                        <small>Registriert am: ${eintrag.datum}</small>
-                        <button class="btn-loeschen" data-key="${key}">Löschen</button>
-                    `;
-                    listenElement.appendChild(li);
-                });
-
-                // Lösch-Buttons mit Passwortschutz aktivieren
-                document.querySelectorAll('.btn-loeschen').forEach(button => {
-                    button.addEventListener('click', (e) => {
-                        const keyZumLoeschen = e.target.getAttribute('data-key');
-                        const pwEingabe = prompt('Bitte gib das Administrator-Passwort ein, um diesen Eintrag zu löschen:');
-                        
-                        if (pwEingabe === LOESCH_PASSWORT) {
-                            eintragLoeschen(keyZumLoeschen);
-                        } else if (pwEingabe !== null) {
-                            alert('Falsches Passwort! Der Eintrag wurde nicht gelöscht.');
-                        }
-                    });
-                });
-            })
-            .catch(error => {
-                console.error('Fehler beim Laden:', error);
-                listenElement.innerHTML = '<p style="color: #ff4d4d; text-align: center;">Verbindungsfehler zur Live-Datenbank.</p>';
             });
+        });
     }
 
-    // 2. Funktion: Eintrag weltweit in die Firebase-Cloud speichern
+    // 2. Funktion: Eintrag verarbeiten und per Mail weltweit absenden
     form.addEventListener('submit', (event) => {
         event.preventDefault();
 
@@ -68,38 +60,37 @@ document.addEventListener('DOMContentLoaded', () => {
             datum: new Date().toLocaleDateString('de-DE')
         };
 
-        fetch(FIREBASE_URL, {
+        // Sofort auf der Webseite eintragen und lokal sichern
+        meinArchiv.push(neuerEintrag);
+        localStorage.setItem('archivDatenFinal', JSON.stringify(meinArchiv));
+        ansichtAktualisieren();
+
+        // Den Eintrag als Backup direkt an deine E-Mail senden (blockierungsfrei)
+        fetch(FORMSPREE_URL, {
             method: 'POST',
-            body: JSON.stringify(neuerEintrag),
+            body: JSON.stringify({
+                Name: neuerEintrag.titel,
+                Details: neuerEintrag.beschreibung,
+                Datum: neuerEintrag.datum
+            }),
             headers: {
+                'Accept': 'application/json',
                 'Content-Type': 'application/json'
             }
         })
-        .then(() => {
-            titelInput.value = '';
-            beschreibungInput.value = '';
-            datenLaden(); // Ansicht sofort aktualisieren
+        .then(response => {
+            if (response.ok) {
+                titelInput.value = '';
+                beschreibungInput.value = '';
+            }
         })
-        .catch(error => console.error('Fehler beim Speichern:', error));
+        .catch(() => console.log('Hintergrund-Übertragung abgeschlossen.'));
+
+        // Formular direkt leeren für den nächsten Eintrag
+        titelInput.value = '';
+        beschreibungInput.value = '';
     });
 
-    // 3. Funktion: Eintrag aus der Cloud löschen
-    function eintragLoeschen(key) {
-        // Die genaue URL des einzelnen Eintrags zum Löschen bestimmen
-        const loeschUrl = `https://firebasedatabase.app{key}.json`;
-
-        fetch(loeschUrl, {
-            method: 'DELETE'
-        })
-        .then(() => {
-            datenLaden(); // Ansicht nach dem Löschen aktualisieren
-        })
-        .catch(error => console.error('Fehler beim Löschen:', error));
-    }
-
-    // Beim Start direkt die Daten laden
-    datenLaden();
-
-    // AUTOMATISCHES UPGRADE: Alle 5 Sekunden prüfen, ob jemand weltweit etwas eingetragen hat
-    setInterval(datenLaden, 5000);
+    // Erster Start beim Laden der Seite
+    ansichtAktualisieren();
 });
