@@ -1,176 +1,119 @@
-@charset "UTF-8";
-
-/* ============================================================
-   ARCHIV DES BÖSEN – DARK / BLOOD AESTHETICS & ANIMATIONS
-   ============================================================ */
-
-:root {
-  --blood-red: #8b0000;
-  --blood-bright: #dc2626;
-  --blood-dark: #450a0a;
-  --dark-bg: #09090b;
-  --dark-surface: #121215;
-  --dark-card: #18181c;
-  --dark-border: #2d1519;
-}
-
 body {
-  font-family: 'Cinzel', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background-color: #070709;
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(139, 0, 0, 0.25) 0%, transparent 65%),
-    radial-gradient(circle at 10% 30%, rgba(70, 4, 4, 0.18) 0%, transparent 40%),
-    radial-gradient(circle at 90% 70%, rgba(50, 2, 2, 0.2) 0%, transparent 45%);
-  color: #f1f1f3;
-  -webkit-font-smoothing: antialiased;
-  min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #1a1a1a;
+    color: #f5f5f5;
+    margin: 0;
+    padding: 20px;
 }
 
-/* Blut-Tropf Effekt am oberen Rand */
-.blood-drip-banner {
-  position: relative;
-  height: 14px;
-  background: linear-gradient(180deg, #600000 0%, #990000 70%, #450000 100%);
-  box-shadow: 0 4px 18px rgba(220, 38, 38, 0.5);
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #262626;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
 }
 
-.blood-drip-banner::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  right: 0;
-  height: 8px;
-  background-image: radial-gradient(circle at 10px 0, #880000 7px, transparent 8px);
-  background-size: 24px 8px;
+h1 {
+    color: #ff4d4d;
+    margin-top: 0;
+    text-align: center;
 }
 
-/* Bluttropfen-Animation */
-@keyframes bloodPulse {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(220, 38, 38, 0.25), inset 0 0 10px rgba(139, 0, 0, 0.2);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(220, 38, 38, 0.55), inset 0 0 18px rgba(185, 28, 28, 0.35);
-  }
+.subtitle {
+    text-align: center;
+    color: #aaa;
+    margin-bottom: 30px;
 }
 
-.animate-pulse-blood {
-  animation: bloodPulse 2.8s infinite ease-in-out;
+.form-group {
+    margin-bottom: 15px;
 }
 
-/* Crime Tape / Evidence Look */
-.crime-tape {
-  background: repeating-linear-gradient(
-    -45deg,
-    #991b1b,
-    #991b1b 12px,
-    #0f0b0c 12px,
-    #0f0b0c 24px
-  );
-  border: 1px solid #7f1d1d;
+label {
+    display: block;
+    margin-bottom: 5px;
+    color: #ccc;
 }
 
-/* Kachel Hover & Blutglanz */
-.killer-card {
-  background: linear-gradient(145deg, #161417 0%, #110e11 100%);
-  border: 1px solid #381b1e;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  overflow: hidden;
+input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #333;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 4px;
 }
 
-.killer-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent, #b91c1c, transparent);
-  opacity: 0.4;
-  transition: opacity 0.25s ease;
+input[type="text"]:focus, textarea:focus {
+    border-color: #ff4d4d;
+    outline: none;
 }
 
-.killer-card:hover {
-  transform: translateY(-4px);
-  border-color: #881337;
-  box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(185, 28, 28, 0.3);
+button {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 16px;
+    font-weight: bold;
 }
 
-.killer-card:hover::before {
-  opacity: 1;
-  background: linear-gradient(90deg, #7f1d1d, #ef4444, #7f1d1d);
+button:hover {
+    background-color: #e60000;
 }
 
-/* "Was ihn ausmachte" Box */
-.hallmark-box {
-  background: rgba(30, 10, 15, 0.65);
-  border-left: 3px solid #dc2626;
-  border-top: 1px solid rgba(153, 27, 27, 0.3);
-  border-right: 1px solid rgba(153, 27, 27, 0.15);
-  border-bottom: 1px solid rgba(153, 27, 27, 0.2);
+h2 {
+    margin-top: 40px;
+    border-bottom: 2px solid #333;
+    padding-bottom: 10px;
 }
 
-/* Opferzahl Badge */
-.victim-count-badge {
-  background: radial-gradient(circle, #7f1d1d 0%, #450a0a 100%);
-  border: 1px solid #ef4444;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.35);
+#archiv-liste {
+    list-style: none;
+    padding: 0;
 }
 
-/* Custom Scrollbar im düsteren Rot */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+.archiv-item {
+    background-color: #333;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 5px solid #ff4d4d;
+    border-radius: 0 4px 4px 0;
+    position: relative;
 }
 
-::-webkit-scrollbar-track {
-  background: #09090b;
+.archiv-item h3 {
+    margin: 0 0 10px 0;
+    color: #ff4d4d;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #450a0a;
-  border-radius: 4px;
-  border: 1px solid #7f1d1d;
+.archiv-item p {
+    margin: 0 0 10px 0;
+    color: #ddd;
+    white-space: pre-wrap;
 }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #7f1d1d;
+.archiv-item small {
+    color: #888;
 }
 
-/* Modal Backdrop */
-.modal-backdrop {
-  background-color: rgba(5, 3, 4, 0.88);
-  backdrop-filter: blur(6px);
+.btn-loeschen {
+    background-color: #555;
+    width: auto;
+    padding: 5px 10px;
+    font-size: 12px;
+    position: absolute;
+    top: 15px;
+    right: 15px;
 }
 
-/* Animation */
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.btn-loeschen:hover {
+    background-color: #cc0000;
 }
 
-.animate-scale-in {
-  animation: fadeInScale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes toastSlide {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-.toast-enter {
-  animation: toastSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
