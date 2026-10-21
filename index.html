@@ -3,72 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archiv des Bösen - Datenbank</title>
+    <title>Archiv des Bösen – Live-Datenbank</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container">
-        <h1>Archiv des Bösen</h1><!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archiv des Bösen - Datenbank</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <div class="container">
-        <h1>Archiv des Bösen</h1>
-        <p class="subtitle">Eine erweiterbare Datenbank</p>
-
-        <!-- Formular zum Hinzufügen von Einträgen -->
-        <form id="archiv-form">
-            <div class="form-group">
-                <label for="titel">Name / Titel:</label>
-                <input type="text" id="titel" placeholder="Was soll archiviert werden?" required>
+        <!-- KOPFBEREICH -->
+        <header class="header">
+            <div class="header-top">
+                <span class="confidential-badge">STRENG VERTRAULICH // FALLAKTEN</span>
+                <div id="live-status-bar" class="status-pill">
+                    <span id="status-indicator" class="status-dot online"></span>
+                    <span id="status-text">Verbinde mit Live-Cloud...</span>
+                    <button type="button" id="btn-refresh" title="Jetzt aktualisieren">↻</button>
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label for="beschreibung">Beschreibung / Details:</label>
-                <textarea id="beschreibung" rows="4" placeholder="Nähere Details hier eintragen..." required></textarea>
+            <h1>ARCHIV DES BÖSEN</h1>
+            <p class="subtitle">Weltweite kriminologische Live-Datenbank &amp; Fallakten</p>
+        </header>
+
+        <!-- STATISTIK-ZEILE OBEN (KPI DASHBOARD) -->
+        <section id="kpi-bar" class="kpi-grid">
+            <div class="kpi-card kpi-blood">
+                <span class="kpi-label">Opfer gesamt (Bestätigt)</span>
+                <span id="stat-total-victims" class="kpi-value">0</span>
+                <span class="kpi-sub">Alle erfassten Fallakten</span>
             </div>
-            
-            <button type="submit" id="btn-speichern">Eintrag speichern</button>
+            <div class="kpi-card kpi-blood">
+                <span class="kpi-label">Höchste Opferzahl</span>
+                <span id="stat-highest-victims" class="kpi-value">0</span>
+                <span id="stat-highest-name" class="kpi-sub">–</span>
+            </div>
+            <div class="kpi-card">
+                <span class="kpi-label">Erfasste Fallakten</span>
+                <span id="stat-total-killers" class="kpi-value">0</span>
+                <span class="kpi-sub">Weltweit synchronisiert</span>
+            </div>
+            <div class="kpi-card kpi-warning">
+                <span class="kpi-label">Ungelöste Phantome</span>
+                <span id="stat-unsolved" class="kpi-value">0</span>
+                <span class="kpi-sub">Nie gefasst / Unbekannt</span>
+            </div>
+        </section>
+
+        <!-- WERKZEUGLEISTE: SUCHE & NEUER EINTRAG BUTTON -->
+        <div class="toolbar">
+            <input type="text" id="suche-input" placeholder="🔍 Fallakte suchen (z. B. Bundy, Dahmer, Clown, Arzt, London)...">
+            <button type="button" id="btn-toggle-form" class="btn-toggle">+ Neue Fallakte anlegen</button>
+        </div>
+
+        <!-- EINGABEFORMULAR (AUFKLAPPBAR) -->
+        <form id="archiv-form" class="archiv-form hidden">
+            <h3>Neue Fallakte weltweit eintragen</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="titel">Name / Titel des Täters *</label>
+                    <input type="text" id="titel" placeholder="z. B. Ted Bundy" required>
+                </div>
+                <div class="form-group">
+                    <label for="alias">Beiname / Alias</label>
+                    <input type="text" id="alias" placeholder="z. B. The Lady Killer">
+                </div>
+                <div class="form-group">
+                    <label for="opfer">Bestätigte Opfer (Zahl) *</label>
+                    <input type="number" id="opfer" min="0" value="1" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="land">Land / Tatort</label>
+                    <input type="text" id="land" placeholder="z. B. USA / Großbritannien">
+                </div>
+                <div class="form-group">
+                    <label for="zeitraum">Aktive Jahre / Zeitraum</label>
+                    <input type="text" id="zeitraum" placeholder="z. B. 1974–1978">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status / Schicksal</label>
+                    <select id="status">
+                        <option value="Hingerichtet">Hingerichtet</option>
+                        <option value="In Haft verstorben">In Haft verstorben</option>
+                        <option value="Lebenslange Haft">Lebenslange Haft</option>
+                        <option value="Ungeklärt / Nie gefasst">Ungeklärt / Nie gefasst</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="beschreibung">Was ihn ausmachte (Modus Operandi) &amp; Fallakte *</label>
+                <textarea id="beschreibung" rows="3" placeholder="Vorgehensweise, psychologische Merkmale und Hintergrundgeschichte..." required></textarea>
+            </div>
+
+            <button type="submit" id="btn-speichern">Eintrag weltweit speichern</button>
         </form>
 
-        <h2>Archivierte Einträge</h2>
-        <!-- Hier zeigt das JavaScript die Einträge an -->
-        <ul id="archiv-liste"></ul>
+        <!-- BEREICHSÜBERSCHRIFT -->
+        <div class="section-header">
+            <h2>Archivierte Fallakten <span id="eintraege-anzahl" class="count-badge">0</span></h2>
+            <span class="sort-hint">Sortiert nach Opferzahl (höchste zuerst)</span>
+        </div>
+
+        <!-- 3ER-GRID FÜR DIE EINTRÄGE -->
+        <ul id="archiv-liste" class="cards-grid"></ul>
     </div>
 
-    <script src="app.js"></script>
-</body>
-</html>
-
-        <p class="subtitle">Eine erweiterbare Live-Datenbank</p>
-
-        <!-- Formular zum Hinzufügen von Einträgen -->
-        <form id="archiv-form">
-            <div class="form-group">
-                <label for="titel">Name / Titel:</label>
-                <input type="text" id="titel" placeholder="Was soll archiviert werden?" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="beschreibung">Beschreibung / Details:</label>
-                <textarea id="beschreibung" rows="4" placeholder="Nähere Details hier eintragen..." required></textarea>
-            </div>
-            
-            <button type="submit" id="btn-speichern">Eintrag speichern</button>
-        </form>
-
-        <h2>Archivierte Einträge</h2>
-        <ul id="archiv-liste"></ul>
-    </div>
-
-    <!-- Normale, blockierungsfreie Skript-Einbindung -->
     <script src="app.js"></script>
 </body>
 </html>
