@@ -1,75 +1,92 @@
-// Beim Laden der Seite direkt die Datenbank-Logik starten
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // 1. Daten aus dem LocalStorage des Browsers laden (oder leeres Array)
-    let meinArchiv = JSON.parse(localStorage.getItem('archivDaten')) || [];
+    // Deine persönliche Firebase-Cloud-Datenbank-URL
+    const FIREBASE_URL = 'https://firebasedatabase.app';
 
-    // 2. Funktion: Liste auf der Webseite neu zeichnen
-    function ansichtAktualisieren() {
-        listenElement.innerHTML = ''; // Liste leeren
+    // 1. Funktion: Daten aus der weltweiten Cloud-Datenbank laden
+    function datenLaden() {
+        fetch(FIREBASE_URL)
+            .then(response => response.json())
+            .then(data => {
+                listenElement.innerHTML = ''; // Liste leeren
 
-        if (meinArchiv.length === 0) {
-            listenElement.innerHTML = '<p style="color: #666; text-align: center;">Das Archiv ist noch leer.</p>';
-            return;
-        }
+                if (!data) {
+                    listenElement.innerHTML = '<p style="color: #666; text-align: center;">Das weltweite Archiv ist noch leer.</p>';
+                    return;
+                }
 
-        // Jeden Eintrag aus der Datenbank durchgehen und anzeigen
-        meinArchiv.forEach(eintrag => {
-            const li = document.createElement('li');
-            li.className = 'archiv-item';
-            li.innerHTML = `
-                <h3>${eintrag.titel}</h3>
-                <p>${eintrag.beschreibung}</p>
-                <small>Registriert am: ${eintrag.datum}</small>
-                <button class="btn-loeschen" data-id="${eintrag.id}">Löschen</button>
-            `;
-            listenElement.appendChild(li);
-        });
+                // Firebase liefert ein Objekt zurück. Wir wandeln es in eine Liste um.
+                Object.keys(data).forEach(key => {
+                    const eintrag = data[key];
+                    const li = document.createElement('li');
+                    li.className = 'archiv-item';
+                    li.innerHTML = `
+                        <h3>${eintrag.titel}</h3>
+                        <p>${eintrag.beschreibung}</p>
+                        <small>Registriert am: ${eintrag.datum}</small>
+                        <button class="btn-loeschen" data-key="${key}">Löschen</button>
+                    `;
+                    listenElement.appendChild(li);
+                });
 
-        // Lösch-Buttons aktivieren
-        document.querySelectorAll('.btn-loeschen').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const idZumLoeschen = Number(e.target.getAttribute('data-id'));
-                eintragLoeschen(idZumLoeschen);
-            });
-        });
+                // Lösch-Buttons für die Cloud-Einträge aktivieren
+                document.querySelectorAll('.btn-loeschen').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const keyZumLoeschen = e.target.getAttribute('data-key');
+                        eintragLoeschen(keyZumLoeschen);
+                    });
+                });
+            })
+            .catch(error => console.error('Fehler beim Laden:', error));
     }
 
-    // 3. Funktion: Neuen Eintrag hinzufügen
+    // 2. Funktion: Neuen Eintrag weltweit in die Cloud speichern
     form.addEventListener('submit', (event) => {
-        event.preventDefault(); // Verhindert das Neuladen der Seite
+        event.preventDefault();
 
         const titelInput = document.getElementById('titel');
         const beschreibungInput = document.getElementById('beschreibung');
 
         const neuerEintrag = {
-            id: Date.now(), // Einmalige ID erzeugen
             titel: titelInput.value,
             beschreibung: beschreibungInput.value,
             datum: new Date().toLocaleDateString('de-DE')
         };
 
-        // Eintrag ins Array packen
-        meinArchiv.push(neuerEintrag);
-
-        // Im Browser-Speicher sichern
-        localStorage.setItem('archivDaten', JSON.stringify(meinArchiv));
-
-        // Formular leeren und Ansicht aktualisieren
-        titelInput.value = '';
-        beschreibungInput.value = '';
-        ansichtAktualisieren();
+        // Per POST-Befehl an Firebase senden
+        fetch(FIREBASE_URL, {
+            method: 'POST',
+            body: JSON.stringify(neuerEintrag),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(() => {
+            titelInput.value = '';
+            beschreibungInput.value = '';
+            datenLaden(); // Liste für alle aktualisieren
+        })
+        .catch(error => console.error('Fehler beim Speichern:', error));
     });
 
-    // 4. Funktion: Eintrag löschen
-    function eintragLoeschen(id) {
-        meinArchiv = meinArchiv.filter(eintrag => eintrag.id !== id);
-        localStorage.setItem('archivDaten', JSON.stringify(meinArchiv));
-        ansichtAktualisieren();
+    // 3. Funktion: Eintrag aus der Cloud löschen
+    function eintragLoeschen(key) {
+        // Die genaue URL des einzelnen Eintrags zum Löschen bestimmen
+        const loeschUrl = FIREBASE_URL.replace('.json', `/${key}.json`);
+
+        fetch(loeschUrl, {
+            method: 'DELETE'
+        })
+        .then(() => {
+            datenLaden(); // Liste aktualisieren
+        })
+        .catch(error => console.error('Fehler beim Löschen:', error));
     }
 
-    // Erste Anzeige beim Öffnen der Webseite
-    ansichtAktualisieren();
+    // Beim Start der Seite direkt die weltweiten Daten laden
+    datenLaden();
+});
+
 });
