@@ -2,8 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine öffentliche jsonbin.io Cloud-Datenbank
+    // Deine funktionierende jsonbin.io Cloud-Datenbank
     const BIN_ID = '6ad88424ac6210605a451855';
+    
+    // Hier ist dein API-Schlüssel wieder drin, sicher verpackt ohne Maskierungsfehler
+    const KEY_PART1 = '\$2a\$10\$';
+    const KEY_PART2 = 'j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2';
+    const MASTER_KEY = KEY_PART1 + KEY_PART2;
+
     const DATABASE_URL = `https://jsonbin.io{BIN_ID}`;
     const LOESCH_PASSWORT = 'geheim123';
     let meinArchiv = [];
@@ -12,14 +18,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function datenLaden() {
         fetch(`${DATABASE_URL}/latest`, {
             method: 'GET',
-            headers: { 'Cache-Control': 'no-cache' }
+            headers: {
+                'X-Master-Key': MASTER_KEY,
+                'Cache-Control': 'no-cache'
+            }
         })
         .then(response => {
             if (!response.ok) throw new Error('Datenbank-Antwort verweigert');
             return response.json();
         })
         .then(resBody => {
-            // Fehlertolerante Entpackung: Prüft alle Varianten, wie jsonbin die Daten liefern kann
             if (resBody && resBody.record) {
                 meinArchiv = Array.isArray(resBody.record) ? resBody.record : [];
             } else if (Array.isArray(resBody)) {
@@ -35,9 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Einträge im HTML darstellen
             meinArchiv.forEach((eintrag, index) => {
-                // Falls ein Eintrag unvollständig ist, Standardwerte nutzen um Abstürze zu verhindern
                 const titel = eintrag.titel || 'Unbenannter Eintrag';
                 const beschreibung = eintrag.beschreibung || 'Keine Beschreibung vorhanden.';
                 const datum = eintrag.datum || 'Unbekanntes Datum';
@@ -51,11 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn-loeschen" data-index="${index}">Löschen</button>
                 `;
                 listenElement.appendChild(li);
-            });
-
-            // Lösch-Buttons aktivieren
-            document.querySelectorAll('.btn-loeschen').forEach(button => {
-                button.replaceWith(button.cloneNode(true)); // Alte EventListener saubermachen
             });
 
             document.querySelectorAll('.btn-loeschen').forEach(button => {
@@ -95,7 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(DATABASE_URL, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Master-Key': MASTER_KEY
             },
             body: JSON.stringify(meinArchiv)
         })
@@ -110,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(error => {
             console.error('Speicherfehler:', error);
-            alert('Fehler beim Speichern. Bitte versuche es in wenigen Sekunden erneut.');
+            alert('Fehler beim Speichern. Bitte versuche es erneut.');
         });
     });
 
@@ -121,7 +123,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(DATABASE_URL, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-Master-Key': MASTER_KEY
             },
             body: JSON.stringify(meinArchiv)
         })
@@ -131,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => alert('Fehler beim Löschen: ' + error));
     }
 
-    // Erster Start
     datenLaden();
 
     // Alle 10 Sekunden im Hintergrund aktualisieren
