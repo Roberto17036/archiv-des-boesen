@@ -2,11 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine feste jsonbin.io Cloud-Datenbank
-    const BIN_ID = '6ad88109ffd5d160537ec371';
-    
-    // HIER WIRD DER KEY ABSOLUT BACKSLASH-FREI ZUSAMMENGESETZT
-    const MASTER_KEY = "\$" + "2a" + "" + "10" + "" + "j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2";
+    // Deine neue öffentliche jsonbin.io Cloud-Datenbank (komplett passwortfrei!)
+    const BIN_ID = '6ad88424ac6210605a451855';
 
     const DATABASE_URL = `https://jsonbin.io{BIN_ID}`;
     const LOESCH_PASSWORT = 'geheim123';
@@ -15,10 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Funktion: Daten aus der weltweiten Cloud laden
     function datenLaden() {
         fetch(`${DATABASE_URL}/latest`, {
-            method: 'GET',
-            headers: {
-                'X-Master-Key': MASTER_KEY
-            }
+            method: 'GET'
         })
         .then(response => {
             if (!response.ok) throw new Error('Datenbank-Antwort verweigert');
@@ -82,8 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(DATABASE_URL, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': MASTER_KEY
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(meinArchiv)
         })
@@ -106,8 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch(DATABASE_URL, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': MASTER_KEY
+                'Content-Type': 'application/json'
             },
             body: JSON.stringify(meinArchiv)
         })
