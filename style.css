@@ -1,304 +1,292 @@
-/* Grunddesign für die gesamte Seite */
+* {
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    background-color: #0d0d0d;
-    background-image: radial-gradient(circle at 50% 50%, #1a0505 0%, #0d0d0d 100%);
+    background-color: #080709;
+    background-image:
+        radial-gradient(circle at 50% 0%, rgba(140, 0, 0, 0.25) 0%, transparent 60%),
+        radial-gradient(circle at 15% 80%, rgba(70, 5, 5, 0.2) 0%, transparent 50%);
     color: #e6e6e6;
     margin: 0;
-    padding: 40px 20px;
+    padding: 30px 20px 60px;
     min-height: 100vh;
 }
 
-/* Der Hauptcontainer der App */
 .container {
-    max-width: 650px;
+    max-width: 1280px;
     margin: 0 auto;
-    background-color: #141414;body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #1a1a1a;
-    color: #f5f5f5;
-    margin: 0;
-    padding: 20px;
 }
 
-.container {
-    max-width: 600px;
-    margin: 0 auto;
-    background-color: #262626;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+/* HEADER */
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #2b1111;
+}
+
+.header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.confidential-badge {
+    font-family: monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    background: #220808;
+    color: #ff6666;
+    border: 1px solid #551111;
+    border-radius: 6px;
+}
+
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #141112;
+    border: 1px solid #2e1d1d;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: #b3b3b3;
+}
+
+.status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    display: inline-block;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+#btn-refresh {
+    background: #261515;
+    color: #ff8080;
+    border: 1px solid #4d1f1f;
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    width: auto;
 }
 
 h1 {
-    color: #ff4d4d;
-    margin-top: 0;
-    text-align: center;
+    color: #ff2a2a;
+    font-size: 2.6rem;
+    margin: 0 0 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    text-shadow: 0 0 18px rgba(255, 42, 42, 0.5);
 }
 
 .subtitle {
-    text-align: center;
-    color: #aaa;
+    color: #999;
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* OBEN: KPI STATISTIK-ZEILE (4 BOXEN NEBENEINANDER) */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.kpi-card {
+    background: linear-gradient(145deg, #161316 0%, #100d10 100%);
+    border: 1px solid #2c1d21;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.kpi-card.kpi-blood {
+    border-color: #5c1616;
+    background: linear-gradient(145deg, #1f0e11 0%, #12080a 100%);
+}
+
+.kpi-card.kpi-warning {
+    border-color: #5c3a16;
+}
+
+.kpi-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #a3a3a3;
+    font-weight: 700;
+}
+
+.kpi-blood .kpi-label { color: #ff7373; }
+.kpi-warning .kpi-label { color: #fbbf24; }
+
+.kpi-value {
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: #ffffff;
+    margin: 6px 0 4px;
+    line-height: 1;
+}
+
+.kpi-blood .kpi-value {
+    color: #ff3b3b;
+    text-shadow: 0 0 12px rgba(255, 59, 59, 0.4);
+}
+
+.kpi-warning .kpi-value { color: #fbbf24; }
+
+.kpi-sub {
+    font-size: 0.78rem;
+    color: #777;
+}
+
+/* TOOLBAR & FORMULAR */
+.toolbar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+#suche-input {
+    flex: 1;
+    padding: 13px 16px;
+    background: #141214;
+    border: 1px solid #331a1a;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.btn-toggle {
+    background: linear-gradient(135deg, #cc0000 0%, #7a0000 100%);
+    color: #fff;
+    border: 1px solid #ff4d4d;
+    padding: 13px 22px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    width: auto;
+    white-space: nowrap;
+}
+
+.archiv-form {
+    background: #141114;
+    border: 1px solid #4a1515;
+    border-radius: 14px;
+    padding: 24px;
     margin-bottom: 30px;
 }
 
-.form-group {
-    margin-bottom: 15px;
+.archiv-form.hidden { display: none; }
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
 }
+
+.form-group { margin-bottom: 16px; }
 
 label {
     display: block;
-    margin-bottom: 5px;
-    color: #ccc;
-}
-
-input[type="text"], textarea {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    background-color: #333;
-    border: 1px solid #444;
-    color: #fff;
-    border-radius: 4px;
-}
-
-input[type="text"]:focus, textarea:focus {
-    border-color: #ff4d4d;
-    outline: none;
-}
-
-button {
-    background-color: #ff4d4d;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-    font-size: 16px;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #e60000;
-}
-
-h2 {
-    margin-top: 40px;
-    border-bottom: 2px solid #333;
-    padding-bottom: 10px;
-}
-
-#archiv-liste {
-    list-style: none;
-    padding: 0;
-}
-
-.archiv-item {
-    background-color: #333;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-left: 5px solid #ff4d4d;
-    border-radius: 0 4px 4px 0;
-    position: relative;
-}
-
-.archiv-item h3 {
-    margin: 0 0 10px 0;
-    color: #ff4d4d;
-}
-
-.archiv-item p {
-    margin: 0 0 10px 0;
-    color: #ddd;
-    white-space: pre-wrap;
-}
-
-.archiv-item small {
-    color: #888;
-}
-
-.btn-loeschen {
-    background-color: #555;
-    width: auto;
-    padding: 5px 10px;
-    font-size: 12px;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-}
-
-.btn-loeschen:hover {
-    background-color: #cc0000;
-}
-
-
-    padding: 40px;
-    border-radius: 16px;
-    border: 1px solid #260d0d;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(255, 26, 26, 0.05);
-}
-
-/* Hauptüberschrift mit Neon-Effekt */
-h1 {
-    color: #ff3333;
-    font-size: 2.5rem;
-    margin-top: 0;
-    margin-bottom: 5px;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
-}
-
-/* Untertitel */
-.subtitle {
-    text-align: center;
-    color: #888;
-    font-size: 1rem;
-    margin-bottom: 40px;
-    letter-spacing: 1px;
-}
-
-/* Abstände der Formular-Bereiche */
-.form-group {
-    margin-bottom: 20px;
-}
-
-/* Beschriftungen über den Eingabefeldern */
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #b3b3b3;
-    font-size: 0.9rem;
+    margin-bottom: 6px;
+    color: #bbb;
+    font-size: 0.85rem;
     font-weight: 600;
 }
 
-/* Eingabefelder & Textbereiche */
-input[type="text"], textarea {
+input[type="text"], input[type="number"], select, textarea {
     width: 100%;
-    padding: 14px;
-    box-sizing: border-box;
-    background-color: #1a1a1a;
-    border: 2px solid #2c2c2c;
-    color: #ffffff;
+    padding: 11px 13px;
+    background: #0d0b0d;
+    border: 1px solid #2e2222;
+    color: #fff;
     border-radius: 8px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
+    font-size: 0.95rem;
 }
 
-/* Effekt, wenn man in ein Eingabefeld klickt */
-input[type="text"]:focus, textarea:focus {
-    border-color: #ff3333;
-    background-color: #221212;
-    box-shadow: 0 0 10px rgba(255, 51, 51, 0.2);
-    outline: none;
-}
-
-/* Großer Speicher-Button */
 button#btn-speichern {
     background: linear-gradient(135deg, #ff3333 0%, #990000 100%);
-    color: #ffffff;
-    padding: 14px 20px;
+    color: #fff;
+    padding: 13px 20px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     width: 100%;
-    font-size: 1.1rem;
-    font-weight: bold;
+    font-size: 1rem;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(255, 51, 51, 0.3);
 }
 
-button#btn-speichern:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 51, 51, 0.5);
-    background: linear-gradient(135deg, #ff4d4d 0%, #b30000 100%);
+/* 3ER-GRID FÜR DIE KACHELN */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #261717;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
 }
 
-button#btn-speichern:active {
-    transform: translateY(1px);
+.count-badge {
+    background: #331111;
+    color: #ff6666;
+    border: 1px solid #661a1a;
+    font-size: 0.85rem;
+    padding: 2px 10px;
+    border-radius: 999px;
 }
 
-/* Überschrift der Liste */
-h2 {
-    margin-top: 50px;
-    font-size: 1.6rem;
-    color: #ffffff;
-    border-bottom: 1px solid #2c2c2c;
-    padding-bottom: 12px;
-}
+.sort-hint { font-size: 0.8rem; color: #777; }
 
-/* Die Liste selbst */
-#archiv-liste {
+#archiv-liste, .cards-grid {
     list-style: none;
     padding: 0;
-    margin: 20px 0 0 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
 }
 
-/* Einzelne Listeneinträge */
 .archiv-item {
-    background-color: #1a1a1a;
+    background: linear-gradient(155deg, #171417 0%, #110e11 100%);
+    border: 1px solid #33181b;
+    border-top: 3px solid #cc1111;
+    border-radius: 12px;
     padding: 20px;
-    margin-bottom: 20px;
-    border-left: 4px solid #ff3333;
-    border-radius: 4px 12px 12px 4px;
-    position: relative;
-    border-top: 1px solid #262626;
-    border-right: 1px solid #262626;
-    border-bottom: 1px solid #262626;
-    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.65);
+    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-/* Leichter Schwebe-Effekt für die Einträge beim Drüberfahren */
 .archiv-item:hover {
-    transform: translateX(4px);
-    background-color: #221c1c;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
-}
-
-/* Titel des Eintrags */
-.archiv-item h3 {
-    margin: 0 0 8px 0;
-    color: #ffffff;
-    font-size: 1.3rem;
-}
-
-/* Beschreibungstext */
-.archiv-item p {
-    margin: 0 0 15px 0;
-    color: #cccccc;
-    line-height: 1.5;
-    white-space: pre-wrap;
-}
-
-/* Datumstext unten links */
-.archiv-item small {
-    color: #666666;
-    font-size: 0.8rem;
-}
-
-/* Der Lösch-Button auf der rechten Seite */
-.btn-loeschen {
-    background-color: #2b2b2b;
-    color: #ff6666;
-    width: auto;
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border-radius: 6px;
-    border: 1px solid #404040;
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    transition: all 0.2s ease;
-}
-
-.btn-loeschen:hover {
-    background-color: #3d1a1a;
-    color: #ffffff;
+    transform: translateY(-4px);
     border-color: #ff3333;
-    box-shadow: 0 0 8px rgba(255, 51, 51, 0.3);
+}
+
+@media (max-width: 1024px) {
+    .kpi-grid, #archiv-liste, .cards-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 680px) {
+    .kpi-grid, .form-row, #archiv-liste, .cards-grid { grid-template-columns: 1fr; }
+    .toolbar { flex-direction: column; align-items: stretch; }
 }
