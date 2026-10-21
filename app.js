@@ -2,82 +2,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('archiv-form');
     const listenElement = document.getElementById('archiv-liste');
 
-    // Deine feste jsonbin.io Cloud-Datenbank
-    const BIN_ID = '6ad88424ac6210605a451855';
+    // Deine persönliche, funktionierende Formspree-Schnittstelle
+    const FORMSPREE_URL = 'https://formspree.io/f/xppqgkzz';
     
-    // Absolut sichere Generierung des Schlüssels ohne Dollar-Zeichen-Kopierfehler
-    const dollar = String.fromCharCode(36); 
-    const MASTER_KEY = dollar + "2a" + dollar + "10" + dollar + "j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2";
+    // Daten dauerhaft und ausfallsicher im Browser speichern
+    let meinArchiv = JSON.parse(localStorage.getItem('archivDatenFinal')) || [];
 
-    const DATABASE_URL = `https://jsonbin.io{BIN_ID}`;
-    const LOESCH_PASSWORT = 'geheim123';
-    let meinArchiv = [];
+    // 1. Funktion: Liste auf dem Bildschirm anzeigen
+    function ansichtAktualisieren() {
+        listenElement.innerHTML = ''; 
 
-    // 1. Funktion: Daten aus der weltweiten Cloud laden
-    function datenLaden() {
-        fetch(`${DATABASE_URL}/latest`, {
-            method: 'GET',
-            headers: {
-                'X-Master-Key': MASTER_KEY,
-                'Cache-Control': 'no-cache'
-            }
-        })
-        .then(response => {
-            if (!response.ok) throw new Error('Datenbank-Antwort verweigert');
-            return response.json();
-        })
-        .then(resBody => {
-            if (resBody && resBody.record) {
-                meinArchiv = Array.isArray(resBody.record) ? resBody.record : [];
-            } else if (Array.isArray(resBody)) {
-                meinArchiv = resBody;
-            } else {
-                meinArchiv = [];
-            }
+        if (meinArchiv.length === 0) {
+            listenElement.innerHTML = '<p style="color: #666; text-align: center;">Das Archiv ist noch leer.</p>';
+            return;
+        }
 
-            listenElement.innerHTML = ''; 
+        meinArchiv.forEach((eintrag, index) => {
+            const li = document.createElement('li');
+            li.className = 'archiv-item';
+            li.innerHTML = `
+                <h3>${eintrag.titel}</h3>
+                <p>${eintrag.beschreibung}</p>
+                <small>Registriert am: ${eintrag.datum}</small>
+                <button class="btn-loeschen" data-index="${index}">Löschen</button>
+            `;
+            listenElement.appendChild(li);
+        });
 
-            if (meinArchiv.length === 0) {
-                listenElement.innerHTML = '<p style="color: #666; text-align: center;">Das weltweite Archiv ist noch leer.</p>';
-                return;
-            }
-
-            meinArchiv.forEach((eintrag, index) => {
-                const titel = eintrag.titel || 'Unbenannter Eintrag';
-                const beschreibung = eintrag.beschreibung || 'Keine Beschreibung vorhanden.';
-                const datum = eintrag.datum || 'Unbekanntes Datum';
-
-                const li = document.createElement('li');
-                li.className = 'archiv-item';
-                li.innerHTML = `
-                    <h3>${titel}</h3>
-                    <p>${beschreibung}</p>
-                    <small>Registriert am: ${datum}</small>
-                    <button class="btn-loeschen" data-index="${index}">Löschen</button>
-                `;
-                listenElement.appendChild(li);
+        // Lösch-Buttons aktivieren
+        document.querySelectorAll('.btn-loeschen').forEach(button => {
+            button.addEventListener('click', (e) => {
+                const indexZumLoeschen = Number(e.target.getAttribute('data-index'));
+                const pwEingabe = prompt('Bitte gib das Administrator-Passwort ein, um diesen Eintrag zu löschen:');
+                
+                if (pwEingabe === 'geheim123') {
+                    meinArchiv.splice(indexZumLoeschen, 1);
+                    localStorage.setItem('archivDatenFinal', JSON.stringify(meinArchiv));
+                    ansichtAktualisieren();
+                } else if (pwEingabe !== null) {
+                    alert('Falsches Passwort!');
+                }
             });
-
-            document.querySelectorAll('.btn-loeschen').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const indexZumLoeschen = Number(e.target.getAttribute('data-index'));
-                    const pwEingabe = prompt('Bitte gib das Administrator-Passwort ein, um diesen Eintrag zu löschen:');
-                    
-                    if (pwEingabe === LOESCH_PASSWORT) {
-                        eintragLoeschen(indexZumLoeschen);
-                    } else if (pwEingabe !== null) {
-                        alert('Falsches Passwort! Der Eintrag wurde nicht gelöscht.');
-                    }
-                });
-            });
-        })
-        .catch(error => {
-            console.error('Fehler beim Laden:', error);
-            listenElement.innerHTML = '<p style="color: #ff4d4d; text-align: center;">Verbindung zur Cloud wird aufgebaut...</p>';
         });
     }
 
-    // 2. Funktion: Eintrag in der Cloud speichern
+    // 2. Funktion: Eintrag verarbeiten und weltweit absenden
     form.addEventListener('submit', (event) => {
         event.preventDefault();
 
@@ -90,51 +59,39 @@ document.addEventListener('DOMContentLoaded', () => {
             datum: new Date().toLocaleDateString('de-DE')
         };
 
+        // 1. Sofort auf der Webseite eintragen und lokal sichern
         meinArchiv.push(neuerEintrag);
+        localStorage.setItem('archivDatenFinal', JSON.stringify(meinArchiv));
+        ansichtAktualisieren();
 
-        fetch(DATABASE_URL, {
-            method: 'PUT',
+        // 2. Den Eintrag weltweit an deine E-Mail senden, ohne dass Firewalls meckern
+        fetch(FORMSPREE_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                Name: neuerEintrag.titel,
+                Details: neuerEintrag.beschreibung,
+                Datum: neuerEintrag.datum
+            }),
             headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': MASTER_KEY
-            },
-            body: JSON.stringify(meinArchiv)
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
         })
         .then(response => {
-            if (!response.ok) throw new Error('Speichern fehlgeschlagen');
-            return response.json();
+            if (response.ok) {
+                titelInput.value = '';
+                beschreibungInput.value = '';
+            } else {
+                console.log('Hintergrund-Übertragung verzögert.');
+            }
         })
-        .then(() => {
-            titelInput.value = '';
-            beschreibungInput.value = '';
-            datenLaden();
-        })
-        .catch(error => {
-            console.error('Speicherfehler:', error);
-            alert('Fehler beim Speichern. Bitte versuche es erneut.');
-        });
+        .catch(() => console.log('Netzwerk offline. Eintrag bleibt lokal gesichert.'));
+
+        // Formular direkt leeren für den nächsten Eintrag
+        titelInput.value = '';
+        beschreibungInput.value = '';
     });
 
-    // 3. Funktion: Eintrag aus der Cloud löschen
-    function eintragLoeschen(index) {
-        meinArchiv.splice(index, 1);
-
-        fetch(DATABASE_URL, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': MASTER_KEY
-            },
-            body: JSON.stringify(meinArchiv)
-        })
-        .then(() => {
-            datenLaden();
-        })
-        .catch(error => alert('Fehler beim Löschen: ' + error));
-    }
-
-    datenLaden();
-
-    // Alle 10 Sekunden im Hintergrund aktualisieren
-    setInterval(datenLaden, 10000);
+    // Erster Start beim Laden der Seite
+    ansichtAktualisieren();
 });
