@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
-    // 0. AUTOMATISCHE SEITEN-BEREINIGUNG & KOMPLETTES DESIGN-UPGRADE (ALLE 4 PUNKTE)
+    // 0. AUTOMATISCHE SEITEN-BEREINIGUNG & KOMPLETTES DESIGN-UPGRADE
     // =========================================================================
     const alleContainer = document.querySelectorAll('.container');
     if (alleContainer.length > 1) {
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hauptContainer = document.querySelector('.container') || document.body;
 
-    // Blut-Banner & Crime-Tape ganz oben einfügen (Punkt 4)
+    // Blut-Banner ganz oben einfügen
     if (!document.getElementById('blood-top-banner')) {
         const bloodBanner = document.createElement('div');
         bloodBanner.id = 'blood-top-banner';
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.prepend(bloodBanner);
     }
 
-    // Vollständiges CSS für alle 4 Feature-Pakete injizieren
+    // Vollständiges CSS für alle Features & Berechtigungs-Badges injizieren
     if (!document.getElementById('archiv-complete-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'archiv-complete-styles';
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .kpi-value { font-size: 2rem; font-weight: 900; color: #ff3b3b; margin: 6px 0 4px; line-height: 1; }
             .kpi-sub { font-size: 0.76rem; color: #888; }
 
-            /* Filter-Pills & Steuerleiste (Punkt 2) */
+            /* Filter-Pills & Steuerleiste */
             .filter-bar-wrap { margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px; }
             .region-pills { display: flex; flex-wrap: wrap; gap: 8px; }
             .pill-btn {
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 width: auto;
                 cursor: pointer;
             }
-            .view-btn, .random-btn {
+            .view-btn, .random-btn, .admin-btn {
                 background: #1c1518;
                 color: #e5e5e5;
                 border: 1px solid #3b2024;
@@ -113,7 +113,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 transition: all 0.2s ease;
             }
             .view-btn.active { background: #7f1d1d; color: #fff; border-color: #ef4444; }
-            .random-btn:hover, .view-btn:hover { border-color: #ef4444; color: #fff; background: #2d161b; }
+            .random-btn:hover, .view-btn:hover, .admin-btn:hover { border-color: #ef4444; color: #fff; background: #2d161b; }
+            .admin-btn.admin-unlocked {
+                background: linear-gradient(135deg, #065f46, #047857);
+                color: #ecfdf5;
+                border-color: #10b981;
+                box-shadow: 0 0 12px rgba(16, 185, 129, 0.35);
+            }
 
             /* 3er-Grid (Standard) */
             #archiv-liste.grid-mode {
@@ -126,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 align-items: stretch;
             }
 
-            /* Historischer Zeitstrahl (Timeline-Modus, Punkt 2) */
+            /* Historischer Zeitstrahl (Timeline-Modus) */
             #archiv-liste.timeline-mode {
                 list-style: none;
                 padding: 10px 0 10px 28px;
@@ -172,8 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 transition: transform 0.2s ease, border-color 0.2s ease;
             }
             .archiv-item:hover { transform: translateY(-4px); border-color: #ef4444; }
+            .archiv-item.own-entry { border-top-color: #10b981; }
 
-            /* Schräger Stempel (Punkt 4) */
+            /* Schräger Stempel */
             .dossier-stamp {
                 display: inline-block;
                 font-family: monospace;
@@ -189,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .stamp-unsolved { background: rgba(120,53,15,0.35); color: #fde68a; border: 1px dashed #f59e0b; }
             .stamp-prison { background: rgba(39,39,42,0.6); color: #d4d4d8; border: 1px dashed #71717a; }
 
-            /* Mugshot / Avatar (Punkt 1) */
+            /* Mugshot / Avatar */
             .mugshot-box {
                 width: 52px;
                 height: 52px;
@@ -224,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             .tag-chip:hover { background: #991b1b; color: #fff; }
 
-            /* Vollbild-Dossier-Modal (Punkt 1 & 3) */
+            /* Vollbild-Dossier-Modal */
             .dossier-modal-backdrop {
                 position: fixed;
                 inset: 0;
@@ -251,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 overflow-y: auto;
             }
 
-            /* Footer Backup Bar (Punkt 4) */
+            /* Footer Backup Bar */
             .archiv-footer {
                 margin-top: 45px;
                 padding-top: 20px;
@@ -307,7 +314,28 @@ document.addEventListener('DOMContentLoaded', () => {
         headerEl.parentNode.insertBefore(tape, headerEl.nextSibling);
     }
 
-    // Erweiterte Felder ins Formular einbauen (Modus Operandi, Forensik-Beweis, Tags, Gefahrenstufe, Bild-URL, Eingereicht von)
+    // =========================================================================
+    // BERECHTIGUNGS- & KOMBI-SCHUTZ-SYSTEM (Browser-ID + Ersteller-PIN + Admin)
+    // =========================================================================
+    const ADMIN_PASSWORT = 'geheim123';
+
+    // Eindeutige Browser-Ersteller-ID für diesen Besucher erzeugen/laden
+    let meineErstellerId = localStorage.getItem('archivCreatorId');
+    if (!meineErstellerId) {
+        meineErstellerId = 'creator-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('archivCreatorId', meineErstellerId);
+    }
+
+    // Prüft, ob der Admin-Modus in diesem Browser aktiv freigeschaltet ist
+    let istAdminAktiv = localStorage.getItem('archivAdminUnlocked') === 'true';
+
+    // Prüft, ob ein Eintrag vom aktuellen Browser erstellt wurde
+    function istEigenerBeitrag(eintrag) {
+        if (!eintrag) return false;
+        return Boolean(eintrag.creatorId && eintrag.creatorId === meineErstellerId);
+    }
+
+    // Erweiterte Felder ins Formular einbauen (inkl. Ersteller-PIN für den Kombi-Schutz)
     if (form && !document.getElementById('modus')) {
         const alteBeschreibungGroup = document.getElementById('beschreibung')?.parentElement;
         if (alteBeschreibungGroup) {
@@ -337,15 +365,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const forensikRow = document.createElement('div');
             forensikRow.className = 'form-row';
-            forensikRow.style.gridTemplateColumns = '2fr 1fr';
+            forensikRow.style.gridTemplateColumns = '1.4fr 1.2fr 1fr';
             forensikRow.innerHTML = `
                 <div class="form-group">
-                    <label for="forensik-input">🔬 Forensischer Beweis / Wie wurde er überführt?</label>
-                    <input type="text" id="forensik-input" placeholder="z. B. DNA-Spur, Bissspuren, Fund im Fundament, nie gefasst...">
+                    <label for="forensik-input">🔬 Forensischer Beweis / Überführung</label>
+                    <input type="text" id="forensik-input" placeholder="z. B. DNA-Spur, Bissspuren, Fund im Fundament...">
                 </div>
                 <div class="form-group">
                     <label for="bild-url">Fahndungsfoto Bild-URL (optional)</label>
-                    <input type="text" id="bild-url" placeholder="https://... (oder leer lassen)">
+                    <input type="text" id="bild-url" placeholder="https://... (.jpg / .png)">
+                </div>
+                <div class="form-group">
+                    <label for="author-pin">🔐 Eigener Bearbeitungs-PIN (optional)</label>
+                    <input type="password" id="author-pin" placeholder="z. B. 4-stelliger PIN für später">
                 </div>
             `;
             alteBeschreibungGroup.parentNode.insertBefore(forensikRow, alteBeschreibungGroup);
@@ -392,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.appendChild(cancelBtn);
     }
 
-    // Schnellfilter-Pills, Sortierung, Zeitstrahl-Umschalter & Zufalls-Button einbauen (Punkt 2 & 3)
+    // Schnellfilter-Pills, Sortierung, Zeitstrahl, Zufalls-Button & Admin-Login-Button einbauen
     const toolbarEl = document.querySelector('.toolbar');
     if (toolbarEl && !document.getElementById('filter-bar-container')) {
         const filterWrap = document.createElement('div');
@@ -403,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         toolbarEl.parentNode.insertBefore(filterWrap, toolbarEl);
 
-        // Erweitere die Toolbar um Sortierung, Zufalls-Button und Ansichts-Wechsel
         toolbarEl.className = 'controls-row';
         toolbarEl.innerHTML = `
             <div class="controls-left">
@@ -420,6 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" id="btn-view-grid" class="view-btn active" title="3er-Kachel-Ansicht">🗂️ 3er-Kacheln</button>
                 <button type="button" id="btn-view-timeline" class="view-btn" title="Historischer Zeitstrahl">⏳ Zeitstrahl</button>
                 <button type="button" id="btn-random-dossier" class="random-btn" title="Zufällige Fallakte öffnen">🎲 Zufalls-Akte</button>
+                <button type="button" id="btn-admin-mode" class="admin-btn" title="Als Administrator an-/abmelden">🔐 Admin-Login</button>
                 <button type="button" id="btn-toggle-form" class="btn-toggle">+ Neue Fallakte</button>
             </div>
         `;
@@ -427,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleFormBtn = document.getElementById('btn-toggle-form');
     }
 
-    // Vollbild-Dossier-Modal (Punkt 1 & 3) im Body anlegen
+    // Vollbild-Dossier-Modal im Body anlegen
     if (!document.getElementById('dossier-detail-modal')) {
         const modal = document.createElement('div');
         modal.id = 'dossier-detail-modal';
@@ -443,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Footer mit JSON-Backup-Download & Crime-Tape anlegen (Punkt 4)
+    // Footer mit JSON-Backup-Download anlegen
     if (hauptContainer && !document.getElementById('archiv-footer-bar')) {
         const footer = document.createElement('footer');
         footer.id = 'archiv-footer-bar';
@@ -463,6 +495,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const abbrechenBtn = document.getElementById('btn-abbrechen');
     const editIndexInput = document.getElementById('edit-index');
     const formUeberschrift = document.getElementById('form-ueberschrift') || (form ? form.querySelector('h3') : null);
+    const adminBtn = document.getElementById('btn-admin-mode');
 
     // =========================================================================
     // CLOUD-DATENBANK KONFIGURATION (JSONBin.io v3 API)
@@ -471,7 +504,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const dollar = String.fromCharCode(36);
     const MASTER_KEY = dollar + '2a' + dollar + '10' + dollar + 'j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2';
     const DATABASE_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
-    const LOESCH_PASSWORT = 'geheim123';
 
     let meinArchiv = [];
     let letzterDatenHash = '';
@@ -479,8 +511,90 @@ document.addEventListener('DOMContentLoaded', () => {
     let suchbegriff = '';
     let aktiverFilter = 'ALL';
     let aktiveSortierung = 'victims-desc';
-    let aktuellerAnsichtsModus = 'grid'; // 'grid' | 'timeline'
-    let offenerModalIndex = null;
+    let aktuellerAnsichtsModus = 'grid';
+
+    // Aktualisiert die Optik des Admin-Buttons
+    function aktualisiereAdminButton() {
+        if (!adminBtn) return;
+        if (istAdminAktiv) {
+            adminBtn.classList.add('admin-unlocked');
+            adminBtn.innerHTML = '👑 Admin aktiv (Vollzugriff)';
+            adminBtn.title = 'Du bist als Admin eingeloggt und kannst jeden Beitrag direkt bearbeiten/löschen. Klicke zum Abmelden.';
+        } else {
+            adminBtn.classList.remove('admin-unlocked');
+            adminBtn.innerHTML = '🔐 Admin-Login';
+            adminBtn.title = 'Für Roberto: Mit Admin-Passwort anmelden, um alle Beiträge frei zu bearbeiten';
+        }
+    }
+    aktualisiereAdminButton();
+
+    if (adminBtn) {
+        adminBtn.addEventListener('click', () => {
+            if (istAdminAktiv) {
+                if (confirm('Möchtest du den Admin-Vollzugriff für diesen Browser wieder sperren (Abmelden)?')) {
+                    istAdminAktiv = false;
+                    localStorage.removeItem('archivAdminUnlocked');
+                    aktualisiereAdminButton();
+                    ansichtRendern(true);
+                }
+            } else {
+                const eingabe = prompt('👑 Bitte gib dein Administrator-Passwort ein, um den Vollzugriff für alle Beiträge freizuschalten:');
+                if (eingabe === ADMIN_PASSWORT) {
+                    istAdminAktiv = true;
+                    localStorage.setItem('archivAdminUnlocked', 'true');
+                    aktualisiereAdminButton();
+                    ansichtRendern(true);
+                    alert('✅ Admin-Modus aktiviert! Du kannst jetzt jeden Beitrag direkt bearbeiten und löschen.');
+                } else if (eingabe !== null) {
+                    alert('❌ Falsches Admin-Passwort!');
+                }
+            }
+        });
+    }
+
+    // Zentrale Schutz-Prüfung für Bearbeiten & Löschen
+    function pruefeZugriffsRecht(index, aktionName = 'bearbeiten') {
+        const eintrag = meinArchiv[index];
+        if (!eintrag) return false;
+
+        // 1. Admin ist bereits eingeloggt -> sofort erlaubt!
+        if (istAdminAktiv) return true;
+
+        // 2. Besucher hat diesen Beitrag in diesem Browser selbst erstellt -> erlaubt!
+        if (istEigenerBeitrag(eintrag)) {
+            if (aktionName === 'löschen') {
+                return confirm(`Möchtest du deinen eigenen Beitrag „${eintrag.name || 'Fallakte'}“ wirklich unwiderruflich löschen?`);
+            }
+            return true;
+        }
+
+        // 3. Fremder Beitrag -> Frage nach Ersteller-PIN (falls vergeben) ODER Admin-Passwort
+        const erstellerName = eintrag.submittedBy || 'Archiv';
+        const hatPin = Boolean(eintrag.authorPin && String(eintrag.authorPin).trim() !== '');
+
+        const hinweisText = hatPin
+            ? `🔒 Geschützter Beitrag von „${erstellerName}“!\n\nNur der Ersteller oder der Admin kann diese Fallakte ${aktionName}.\nBitte gib deinen persönlichen Ersteller-PIN (oder das Admin-Passwort) ein:`
+            : `🔒 Geschützte Fallakte!\n\nDieser Eintrag gehört zum offiziellen Archiv (${erstellerName}).\nNur der Administrator kann diesen Beitrag ${aktionName}.\n\nBitte Admin-Passwort eingeben:`;
+
+        const codeEingabe = prompt(hinweisText);
+        if (codeEingabe === null) return false;
+
+        // Falls Admin-Passwort eingegeben wurde -> erlauben & Admin-Modus direkt merken!
+        if (codeEingabe === ADMIN_PASSWORT) {
+            istAdminAktiv = true;
+            localStorage.setItem('archivAdminUnlocked', 'true');
+            aktualisiereAdminButton();
+            return true;
+        }
+
+        // Falls der korrekte Ersteller-PIN dieses Beitrags eingegeben wurde -> erlauben!
+        if (hatPin && codeEingabe.trim() === String(eintrag.authorPin).trim()) {
+            return true;
+        }
+
+        alert(`⛔ Zugriff verweigert! Du kannst nur deine eigenen Beiträge ${aktionName} (oder benötigst das Admin-Passwort).`);
+        return false;
+    }
 
     function escapeHtml(text) {
         if (!text) return '';
@@ -599,13 +713,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Rendert die Schnellfilter-Buttons oben (Punkt 2)
     function rendereFilterPills() {
         const container = document.getElementById('region-pills');
         if (!container) return;
 
         const filterOptionen = [
             { id: 'ALL', label: '📁 Alle Fallakten', pruefe: () => true },
+            { id: 'MINE', label: '✨ Meine Beiträge', pruefe: (k) => istEigenerBeitrag(k) },
             { id: 'DE', label: '🇩🇪 Deutschland', pruefe: (k) => String(k.country || '').toLowerCase().includes('deutschland') },
             { id: 'USA', label: '🇺🇸 USA', pruefe: (k) => String(k.country || '').toLowerCase().includes('usa') },
             { id: 'UK', label: '🇬🇧 Großbritannien', pruefe: (k) => String(k.country || '').toLowerCase().includes('großbritannien') || String(k.country || '').toLowerCase().includes('london') },
@@ -677,8 +791,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elBadge) elBadge.textContent = String(anzahlKillers);
     }
 
-    // Bearbeitungsmodus starten
+    // Bearbeitungsmodus starten (nach bestandener Berechtigungsprüfung)
     function starteBearbeitung(index) {
+        if (!pruefeZugriffsRecht(index, 'bearbeiten')) return;
+
         const eintrag = meinArchiv[index];
         if (!eintrag || !form) return;
 
@@ -699,6 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const eingereichtInput = document.getElementById('eingereicht-von');
         const forensikInput = document.getElementById('forensik-input');
         const bildUrlInput = document.getElementById('bild-url');
+        const authorPinInput = document.getElementById('author-pin');
 
         if (editIndexInput) editIndexInput.value = String(index);
         if (titelInput) titelInput.value = name;
@@ -711,6 +828,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (eingereichtInput) eingereichtInput.value = eintrag.submittedBy || '';
         if (forensikInput) forensikInput.value = eintrag.forensicFact || '';
         if (bildUrlInput) bildUrlInput.value = eintrag.imageUrl || '';
+        if (authorPinInput) authorPinInput.value = eintrag.authorPin || '';
 
         if (statusInput) {
             const aktStatus = eintrag.status || 'Hingerichtet';
@@ -740,11 +858,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (titelInput) titelInput.focus();
     }
 
-    // Vollbild-Dossier-Modal öffnen (inkl. Ermittler-Notizen & Kommentare, Punkt 1 & 3)
+    // Vollbild-Dossier-Modal öffnen
     function oeffneDossierModal(index) {
         const eintrag = meinArchiv[index];
         if (!eintrag) return;
-        offenerModalIndex = index;
 
         const modal = document.getElementById('dossier-detail-modal');
         const content = document.getElementById('dossier-modal-content');
@@ -755,7 +872,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const alias = escapeHtml(eintrag.alias || 'Fallakte');
         const land = escapeHtml(eintrag.country || 'Weltweit');
         const zeitraum = escapeHtml(eintrag.activePeriod || 'Unbekannt');
-        const status = escapeHtml(eintrag.status || 'Archiviert');
         const vermutet = escapeHtml(eintrag.suspectedVictims || `${opfer}+`);
         const { modus, details } = trenneModusUndFallakte(eintrag);
         const skullsCount = Math.min(5, Math.max(1, Number(eintrag.skulls) || 5));
@@ -765,6 +881,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const notes = Array.isArray(eintrag.notes) ? eintrag.notes : [];
         const forensik = escapeHtml(eintrag.forensicFact || 'Keine spezifischen forensischen Details hinterlegt.');
         const eingereichtVon = escapeHtml(eintrag.submittedBy || 'Forensik-Archiv');
+        const darfDirektBearbeiten = istAdminAktiv || istEigenerBeitrag(eintrag);
 
         content.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:1px solid #38181c;padding-bottom:16px;margin-bottom:18px;">
@@ -809,7 +926,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${tags.map(t => `<span class="tag-chip">#${escapeHtml(t)}</span>`).join('')}
             </div>` : ''}
 
-            <!-- COMMUNITY ERMITTLER-NOTIZEN (Punkt 3) -->
+            <!-- COMMUNITY ERMITTLER-NOTIZEN -->
             <div style="border-top:1px solid #2e181b;padding-top:16px;margin-top:10px;">
                 <h4 style="margin:0 0 10px 0;font-size:0.9rem;color:#fca5a5;">💬 Ermittler-Notizen & Hinweise (${notes.length})</h4>
                 <div id="modal-notes-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;max-height:160px;overflow-y:auto;">
@@ -837,7 +954,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:14px;border-top:1px solid #2b1619;">
                 <button type="button" id="modal-copy-btn" style="width:auto;background:#1c1619;color:#ccc;border:1px solid #382428;padding:8px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;">📋 Akte kopieren</button>
                 <div style="display:flex;gap:8px;">
-                    <button type="button" id="modal-edit-btn" style="width:auto;background:#1f242d;color:#60a5fa;border:1px solid #2e3b4e;padding:8px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600;">✏️ Akte bearbeiten</button>
+                    <button type="button" id="modal-edit-btn" style="width:auto;background:#1f242d;color:#60a5fa;border:1px solid #2e3b4e;padding:8px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600;">
+                        ${darfDirektBearbeiten ? '✏️ Akte bearbeiten' : '🔒 Akte bearbeiten (PIN/Admin)'}
+                    </button>
                     <button type="button" id="modal-close-btn" style="width:auto;background:#33181b;color:#fff;border:1px solid #5c1d24;padding:8px 16px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:700;">Schließen</button>
                 </div>
             </div>
@@ -856,7 +975,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Fallakte in die Zwischenablage kopiert!');
         });
 
-        // Neue Ermittler-Notiz direkt in der Cloud speichern
         document.getElementById('modal-note-form')?.addEventListener('submit', async (ev) => {
             ev.preventDefault();
             const autorVal = document.getElementById('note-author')?.value.trim() || 'Anonymer Ermittler';
@@ -890,12 +1008,13 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Notiz löschen (mit Admin-Passwort)
         content.querySelectorAll('.btn-note-del').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const nIdx = Number(btn.getAttribute('data-nidx'));
-                const pw = prompt('Admin-Passwort zum Löschen dieser Notiz:');
-                if (pw !== LOESCH_PASSWORT) return;
+                if (!istAdminAktiv) {
+                    const pw = prompt('Admin-Passwort zum Löschen dieser Notiz:');
+                    if (pw !== ADMIN_PASSWORT) return;
+                }
                 istAmSpeichern = true;
                 try {
                     meinArchiv[index].notes.splice(nIdx, 1);
@@ -909,9 +1028,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Haupt-Render-Funktion (3er-Kacheln & Zeitstrahl)
+    // Haupt-Render-Funktion
     function ansichtRendern(erzwingen = false) {
-        const aktuellerHash = JSON.stringify(meinArchiv) + '||' + suchbegriff + '||' + aktiverFilter + '||' + aktiveSortierung + '||' + aktuellerAnsichtsModus;
+        const aktuellerHash = JSON.stringify(meinArchiv) + '||' + suchbegriff + '||' + aktiverFilter + '||' + aktiveSortierung + '||' + aktuellerAnsichtsModus + '||' + istAdminAktiv;
         if (!erzwingen && aktuellerHash === letzterDatenHash) {
             return;
         }
@@ -933,9 +1052,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 shocks: Number(eintrag.shockCount) || 0
             }))
             .filter(({ eintrag }) => {
-                // Schnellfilter prüfen
                 const c = String(eintrag.country || '').toLowerCase();
                 const s = String(eintrag.status || '').toLowerCase();
+                if (aktiverFilter === 'MINE' && !istEigenerBeitrag(eintrag)) return false;
                 if (aktiverFilter === 'DE' && !c.includes('deutschland')) return false;
                 if (aktiverFilter === 'USA' && !c.includes('usa')) return false;
                 if (aktiverFilter === 'UK' && !c.includes('großbritannien') && !c.includes('london')) return false;
@@ -943,7 +1062,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (aktiverFilter === 'EXECUTED' && !s.includes('hingerichtet')) return false;
                 if (aktiverFilter === 'UNSOLVED' && !s.includes('ungeklärt') && !s.includes('nie gefasst')) return false;
 
-                // Suchbegriff prüfen
                 if (!suchbegriff) return true;
                 const volltext = [
                     eintrag.name,
@@ -985,7 +1103,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const { modus, details } = trenneModusUndFallakte(eintrag);
             const hallmarkHtml = escapeHtml(modus);
             const detailsHtml = escapeHtml(details);
-            const vermutet = escapeHtml(eintrag.suspectedVictims || `${opfer}+`);
             const skullsCount = Math.min(5, Math.max(1, Number(eintrag.skulls) || 5));
             const skullsStr = '💀'.repeat(skullsCount);
             const stempel = holeStempelDaten(eintrag.status);
@@ -994,7 +1111,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const forensik = eintrag.forensicFact ? escapeHtml(eintrag.forensicFact) : '';
             const eingereichtVon = escapeHtml(eintrag.submittedBy || 'Archiv');
 
-            // Forensischer Mugshot (Bild oder Silhouette)
+            const eigener = istEigenerBeitrag(eintrag);
+            const darfDirektBearbeiten = istAdminAktiv || eigener;
+
             const mugshotHtml = eintrag.imageUrl
                 ? `<div class="mugshot-box"><img src="${escapeHtml(eintrag.imageUrl)}" alt="${name}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem;\\'>🕵️</span>'"></div>`
                 : `<div class="mugshot-box" title="Forensisches Dossier-Profil">
@@ -1004,7 +1123,7 @@ document.addEventListener('DOMContentLoaded', () => {
                    </div>`;
 
             const li = document.createElement('li');
-            li.className = 'archiv-item';
+            li.className = `archiv-item ${eigener ? 'own-entry' : ''}`;
             li.setAttribute('data-year', String(jahr));
             li.innerHTML = `
                 <div>
@@ -1029,11 +1148,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
 
-                    <!-- Meta-Badges -->
+                    <!-- Meta-Badges (inkl. "Dein Beitrag"-Markierung) -->
                     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
                         <span style="font-size:0.72rem;padding:3px 8px;border-radius:5px;background:#1c181c;border:1px solid #2e262e;color:#ccc;">📍 ${land}</span>
                         <span style="font-size:0.72rem;padding:3px 8px;border-radius:5px;background:#1c181c;border:1px solid #2e262e;color:#ccc;">⏱ ${zeitraum}</span>
                         <span style="font-size:0.7rem;padding:3px 8px;border-radius:5px;background:#181418;border:1px solid #2a202a;color:#999;">👤 ${eingereichtVon}</span>
+                        ${eigener ? `<span style="font-size:0.7rem;padding:3px 8px;border-radius:5px;background:rgba(16,185,129,0.18);border:1px solid #10b981;color:#6ee7b7;font-weight:700;">✨ Dein Beitrag</span>` : ''}
                     </div>
 
                     <!-- Modus Operandi (WEISS in der roten Box) -->
@@ -1058,7 +1178,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>` : ''}
                 </div>
 
-                <!-- Karten-Footer: Schock-Button, Akte öffnen, Löschen & Bearbeiten -->
+                <!-- Karten-Footer: Schock-Button, Akte öffnen, Löschen & Bearbeiten (mit Schutz-Status) -->
                 <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #241a1d;margin-top:auto;gap:6px;flex-wrap:wrap;">
                     <div style="display:flex;align-items:center;gap:6px;">
                         <button type="button" class="btn-shock" data-index="${index}" title="Fall als besonders verstörend markieren (Live-Counter)" style="background:#1c1215;color:#fca5a5;border:1px solid #442026;padding:4px 9px;font-size:0.73rem;border-radius:6px;cursor:pointer;width:auto;">
@@ -1070,8 +1190,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div style="display:flex;align-items:center;gap:6px;">
-                        <button type="button" class="btn-loeschen" data-index="${index}" style="position:static;background:#221618;color:#ff6666;border:1px solid #442226;padding:5px 10px;font-size:0.74rem;font-weight:600;border-radius:6px;cursor:pointer;width:auto;">Löschen</button>
-                        <button type="button" class="btn-bearbeiten" data-index="${index}" style="position:static;background:#1f242d;color:#60a5fa;border:1px solid #2e3b4e;padding:5px 10px;font-size:0.74rem;font-weight:600;border-radius:6px;cursor:pointer;width:auto;">Bearbeiten</button>
+                        <button type="button" class="btn-loeschen" data-index="${index}" title="${darfDirektBearbeiten ? 'Eintrag löschen' : 'Geschützt: Nur Ersteller oder Admin'}" style="position:static;background:#221618;color:${darfDirektBearbeiten ? '#ff6666' : '#885555'};border:1px solid #442226;padding:5px 10px;font-size:0.74rem;font-weight:600;border-radius:6px;cursor:pointer;width:auto;">
+                            ${darfDirektBearbeiten ? 'Löschen' : '🔒 Löschen'}
+                        </button>
+                        <button type="button" class="btn-bearbeiten" data-index="${index}" title="${darfDirektBearbeiten ? 'Deinen Beitrag direkt bearbeiten' : 'Geschützt: Nur für Ersteller oder Admin bearbeitbar'}" style="position:static;background:#1f242d;color:${darfDirektBearbeiten ? '#60a5fa' : '#7c8ba1'};border:1px solid #2e3b4e;padding:5px 10px;font-size:0.74rem;font-weight:600;border-radius:6px;cursor:pointer;width:auto;">
+                            ${darfDirektBearbeiten ? '✏️ Bearbeiten' : '🔒 Bearbeiten'}
+                        </button>
                     </div>
                 </div>
             `;
@@ -1096,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // 💀 Schock-Counter live hochzählen (Punkt 3)
+        // 💀 Schock-Counter live hochzählen
         listenElement.querySelectorAll('.btn-shock').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const idx = Number(e.currentTarget.getAttribute('data-index'));
@@ -1109,20 +1233,17 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Löschen-Buttons
+        // Löschen-Buttons (mit Kombi-Schutz)
         listenElement.querySelectorAll('.btn-loeschen').forEach((button) => {
             button.addEventListener('click', (e) => {
                 const indexZumLoeschen = Number(e.currentTarget.getAttribute('data-index'));
-                const pwEingabe = prompt('Bitte gib das Administrator-Passwort ein, um diese Fallakte weltweit zu löschen:');
-                if (pwEingabe === LOESCH_PASSWORT) {
+                if (pruefeZugriffsRecht(indexZumLoeschen, 'löschen')) {
                     eintragLoeschen(indexZumLoeschen);
-                } else if (pwEingabe !== null) {
-                    alert('Falsches Passwort! Der Eintrag wurde nicht gelöscht.');
                 }
             });
         });
 
-        // Bearbeiten-Buttons rechts neben Löschen
+        // Bearbeiten-Buttons rechts neben Löschen (mit Kombi-Schutz)
         listenElement.querySelectorAll('.btn-bearbeiten').forEach((button) => {
             button.addEventListener('click', (e) => {
                 const indexZumBearbeiten = Number(e.currentTarget.getAttribute('data-index'));
@@ -1190,6 +1311,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const eingereichtInput = document.getElementById('eingereicht-von');
             const forensikInput = document.getElementById('forensik-input');
             const bildUrlInput = document.getElementById('bild-url');
+            const authorPinInput = document.getElementById('author-pin');
 
             const name = titelInput ? titelInput.value.trim() : '';
             const alias = aliasInput && aliasInput.value.trim() ? aliasInput.value.trim() : 'Fallakte';
@@ -1204,6 +1326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const submittedBy = eingereichtInput && eingereichtInput.value.trim() ? eingereichtInput.value.trim() : 'Community';
             const forensicFact = forensikInput ? forensikInput.value.trim() : '';
             const imageUrl = bildUrlInput ? bildUrlInput.value.trim() : '';
+            const authorPin = authorPinInput ? authorPinInput.value.trim() : '';
 
             let hallmark = '';
             let description = '';
@@ -1248,6 +1371,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const aktualisierterEintrag = {
                     ...altesObjekt,
                     id: altesObjekt.id || 'killer-' + Date.now(),
+                    // Beim Neu-Erstellen wird automatisch die Browser-ID des Erstellers gespeichert; beim Bearbeiten bleibt sie erhalten
+                    creatorId: altesObjekt.creatorId || meineErstellerId,
+                    authorPin: authorPin || altesObjekt.authorPin || '',
                     name: name,
                     alias: alias,
                     confirmedVictims: opfer,
@@ -1284,7 +1410,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ansichtRendern(true);
                 setzeStatus('online', bearbeitungsIndex >= 0
                     ? `Änderungen gespeichert! (${meinArchiv.length} Akten)`
-                    : `Eintrag veröffentlicht! (${meinArchiv.length} Akten)`);
+                    : `Dein Beitrag wurde veröffentlicht! (${meinArchiv.length} Akten)`);
             } catch (error) {
                 alert('Fehler beim Speichern in der Cloud.');
             } finally {
