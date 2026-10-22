@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.prepend(bloodBanner);
     }
 
-    // Vollständiges CSS für alle Features & Berechtigungs-Badges injizieren
+    // Vollständiges CSS für alle Features, Berechtigungs-Badges & Live-Chat injizieren
     if (!document.getElementById('archiv-complete-styles')) {
         const styleTag = document.createElement('style');
         styleTag.id = 'archiv-complete-styles';
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 text-transform: uppercase;
                 font-weight: 700;
             }
-            .container { max-width: 1320px !important; width: 100%; margin: 0 auto; padding: 0 18px 50px; }
+            .container { max-width: 1320px !important; width: 100%; margin: 0 auto; padding: 0 18px 90px; }
             .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
             .kpi-card { background: linear-gradient(145deg, #161215 0%, #0f0c0f 100%); border: 1px solid #3b171b; border-radius: 12px; padding: 16px 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: flex; flex-direction: column; }
             .kpi-label { font-size: 0.73rem; text-transform: uppercase; letter-spacing: 1px; color: #ff7373; font-weight: 700; }
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 border-radius: 12px;
                 margin-bottom: 22px;
             }
-            .controls-left { display: flex; flex: 1; gap: 10px; align-items: center; min-width: 260px; }
+            .controls-left { display: flex; flex: 1; gap: 10px; align-items: center; min-width: 240px; }
             .controls-right { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
             .sort-select {
                 background: #1a1518;
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 width: auto;
                 cursor: pointer;
             }
-            .view-btn, .random-btn, .admin-btn {
+            .view-btn, .random-btn, .admin-btn, .chat-top-btn {
                 background: #1c1518;
                 color: #e5e5e5;
                 border: 1px solid #3b2024;
@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 transition: all 0.2s ease;
             }
             .view-btn.active { background: #7f1d1d; color: #fff; border-color: #ef4444; }
-            .random-btn:hover, .view-btn:hover, .admin-btn:hover { border-color: #ef4444; color: #fff; background: #2d161b; }
+            .random-btn:hover, .view-btn:hover, .admin-btn:hover, .chat-top-btn:hover { border-color: #ef4444; color: #fff; background: #2d161b; }
             .admin-btn.admin-unlocked {
                 background: linear-gradient(135deg, #065f46, #047857);
                 color: #ecfdf5;
@@ -143,9 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 border-left: 3px solid #991b1b;
                 position: relative;
             }
-            #archiv-liste.timeline-mode .archiv-item {
-                position: relative;
-            }
+            #archiv-liste.timeline-mode .archiv-item { position: relative; }
             #archiv-liste.timeline-mode .archiv-item::before {
                 content: attr(data-year);
                 position: absolute;
@@ -258,6 +256,179 @@ document.addEventListener('DOMContentLoaded', () => {
                 overflow-y: auto;
             }
 
+            /* =========================================================
+               LIVE-CHAT WIDGET (ERMITTLER-FUNK) STYLING
+               ========================================================= */
+            .livechat-fab {
+                position: fixed;
+                bottom: 22px;
+                right: 22px;
+                z-index: 9500;
+                background: linear-gradient(135deg, #b91c1c, #7f1d1d);
+                color: #fff;
+                border: 1px solid #f87171;
+                border-radius: 999px;
+                padding: 13px 20px;
+                font-size: 0.9rem;
+                font-weight: 800;
+                cursor: pointer;
+                width: auto;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                box-shadow: 0 10px 30px rgba(220, 38, 38, 0.55);
+                transition: transform 0.2s ease, box-shadow 0.2s ease;
+            }
+            .livechat-fab:hover {
+                transform: translateY(-3px) scale(1.02);
+                box-shadow: 0 14px 35px rgba(220, 38, 38, 0.75);
+            }
+            .livechat-dot {
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                background: #22c55e;
+                box-shadow: 0 0 8px #22c55e;
+                display: inline-block;
+            }
+            .livechat-unread {
+                background: #fff;
+                color: #991b1b;
+                font-size: 0.72rem;
+                font-weight: 900;
+                padding: 2px 7px;
+                border-radius: 999px;
+            }
+            .livechat-unread.hidden { display: none !important; }
+
+            .livechat-window {
+                position: fixed;
+                bottom: 82px;
+                right: 22px;
+                width: 370px;
+                max-width: calc(100vw - 32px);
+                height: 510px;
+                max-height: calc(100vh - 120px);
+                background: #110d11;
+                border: 2px solid #991b1b;
+                border-radius: 16px;
+                z-index: 9500;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                box-shadow: 0 20px 55px rgba(0,0,0,0.92), 0 0 25px rgba(220,38,38,0.25);
+            }
+            .livechat-window.hidden { display: none !important; }
+
+            .livechat-header {
+                background: linear-gradient(90deg, #450a0a, #7f1d1d);
+                padding: 12px 15px;
+                border-bottom: 1px solid #ef4444;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+            }
+            .livechat-messages {
+                flex: 1;
+                padding: 14px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                background: radial-gradient(circle at center, #161015 0%, #0b090b 100%);
+            }
+            .chat-bubble {
+                max-width: 86%;
+                padding: 9px 12px;
+                border-radius: 12px;
+                font-size: 0.82rem;
+                line-height: 1.45;
+                position: relative;
+                word-wrap: break-word;
+            }
+            .chat-bubble.other-msg {
+                align-self: flex-start;
+                background: #1c161b;
+                border: 1px solid #332026;
+                color: #e5e5e5;
+                border-bottom-left-radius: 3px;
+            }
+            .chat-bubble.own-msg {
+                align-self: flex-end;
+                background: rgba(127, 29, 29, 0.45);
+                border: 1px solid #dc2626;
+                color: #fff;
+                border-bottom-right-radius: 3px;
+            }
+            .chat-bubble.admin-msg {
+                border-color: #f59e0b !important;
+                background: linear-gradient(145deg, rgba(120, 53, 15, 0.45), rgba(69, 10, 10, 0.6)) !important;
+            }
+            .chat-meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 3px;
+                font-size: 0.7rem;
+            }
+            .chat-author { font-weight: 800; color: #fca5a5; }
+            .chat-admin-badge {
+                background: #f59e0b;
+                color: #000;
+                font-size: 0.62rem;
+                font-weight: 900;
+                padding: 1px 5px;
+                border-radius: 4px;
+                margin-left: 4px;
+                text-transform: uppercase;
+            }
+            .chat-time { color: #777; font-size: 0.66rem; }
+            .chat-del-btn {
+                background: transparent;
+                border: none;
+                color: #888;
+                font-size: 0.7rem;
+                cursor: pointer;
+                padding: 0 3px;
+                width: auto;
+            }
+            .chat-del-btn:hover { color: #ef4444; }
+
+            .livechat-emojis {
+                display: flex;
+                gap: 6px;
+                padding: 6px 12px;
+                background: #140f14;
+                border-top: 1px solid #26171b;
+                overflow-x: auto;
+            }
+            .emoji-quick-btn {
+                background: #1f171e;
+                border: 1px solid #362229;
+                border-radius: 6px;
+                padding: 3px 8px;
+                font-size: 0.85rem;
+                cursor: pointer;
+                width: auto;
+                transition: background 0.15s;
+            }
+            .emoji-quick-btn:hover { background: #7f1d1d; }
+
+            .livechat-form {
+                padding: 10px 12px;
+                background: #161116;
+                border-top: 1px solid #2e1a1f;
+                display: flex;
+                flex-direction: column;
+                gap: 7px;
+            }
+            .livechat-input-row {
+                display: flex;
+                gap: 7px;
+            }
+
             /* Footer Backup Bar */
             .archiv-footer {
                 margin-top: 45px;
@@ -319,23 +490,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================================================
     const ADMIN_PASSWORT = 'geheim123';
 
-    // Eindeutige Browser-Ersteller-ID für diesen Besucher erzeugen/laden
     let meineErstellerId = localStorage.getItem('archivCreatorId');
     if (!meineErstellerId) {
         meineErstellerId = 'creator-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
         localStorage.setItem('archivCreatorId', meineErstellerId);
     }
 
-    // Prüft, ob der Admin-Modus in diesem Browser aktiv freigeschaltet ist
     let istAdminAktiv = localStorage.getItem('archivAdminUnlocked') === 'true';
 
-    // Prüft, ob ein Eintrag vom aktuellen Browser erstellt wurde
     function istEigenerBeitrag(eintrag) {
         if (!eintrag) return false;
         return Boolean(eintrag.creatorId && eintrag.creatorId === meineErstellerId);
     }
 
-    // Erweiterte Felder ins Formular einbauen (inkl. Ersteller-PIN für den Kombi-Schutz)
+    // Erweiterte Felder ins Formular einbauen
     if (form && !document.getElementById('modus')) {
         const alteBeschreibungGroup = document.getElementById('beschreibung')?.parentElement;
         if (alteBeschreibungGroup) {
@@ -424,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
         wrapper.appendChild(cancelBtn);
     }
 
-    // Schnellfilter-Pills, Sortierung, Zeitstrahl, Zufalls-Button & Admin-Login-Button einbauen
+    // Schnellfilter-Pills, Sortierung, Zeitstrahl, Zufalls-Button, Live-Chat & Admin-Login einbauen
     const toolbarEl = document.querySelector('.toolbar');
     if (toolbarEl && !document.getElementById('filter-bar-container')) {
         const filterWrap = document.createElement('div');
@@ -451,6 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <button type="button" id="btn-view-grid" class="view-btn active" title="3er-Kachel-Ansicht">🗂️ 3er-Kacheln</button>
                 <button type="button" id="btn-view-timeline" class="view-btn" title="Historischer Zeitstrahl">⏳ Zeitstrahl</button>
                 <button type="button" id="btn-random-dossier" class="random-btn" title="Zufällige Fallakte öffnen">🎲 Zufalls-Akte</button>
+                <button type="button" id="btn-open-chat-top" class="chat-top-btn" title="Live-Chat öffnen">💬 Live-Chat</button>
                 <button type="button" id="btn-admin-mode" class="admin-btn" title="Als Administrator an-/abmelden">🔐 Admin-Login</button>
                 <button type="button" id="btn-toggle-form" class="btn-toggle">+ Neue Fallakte</button>
             </div>
@@ -473,6 +642,64 @@ document.addEventListener('DOMContentLoaded', () => {
                 modal.classList.add('hidden');
             }
         });
+    }
+
+    // =========================================================================
+    // LIVE-CHAT WIDGET IM BODY ERSTELLEN
+    // =========================================================================
+    if (!document.getElementById('archiv-livechat-widget')) {
+        const chatContainer = document.createElement('div');
+        chatContainer.id = 'archiv-livechat-widget';
+        const gespeicherterName = localStorage.getItem('archivChatNickname') || '';
+
+        chatContainer.innerHTML = `
+            <!-- Schwebender Button unten rechts -->
+            <button type="button" id="livechat-fab-btn" class="livechat-fab">
+                <span class="livechat-dot"></span>
+                <span>💬 Ermittler-Livechat</span>
+                <span id="livechat-unread-badge" class="livechat-unread hidden">0</span>
+            </button>
+
+            <!-- Aufklappbares Live-Chat-Fenster -->
+            <div id="livechat-window" class="livechat-window hidden">
+                <div class="livechat-header">
+                    <div>
+                        <div style="font-weight:800;font-size:0.92rem;color:#fff;display:flex;align-items:center;gap:7px;">
+                            <span class="livechat-dot"></span>
+                            <span>ERMITTLER-FUNK (LIVE)</span>
+                        </div>
+                        <div id="livechat-substatus" style="font-size:0.68rem;color:#fca5a5;">Echtzeit-Übertragung aktiv</div>
+                    </div>
+                    <div style="display:flex;gap:6px;align-items:center;">
+                        <button type="button" id="livechat-clear-btn" title="Gesamten Chat leeren (Admin)" style="display:none;width:auto;background:rgba(0,0,0,0.4);color:#fca5a5;border:1px solid #f87171;padding:4px 8px;border-radius:6px;font-size:0.7rem;cursor:pointer;">🗑️ Leeren</button>
+                        <button type="button" id="livechat-close-btn" title="Chat minimieren" style="width:auto;background:rgba(0,0,0,0.35);color:#fff;border:1px solid rgba(255,255,255,0.2);padding:4px 9px;border-radius:6px;font-size:0.8rem;cursor:pointer;font-weight:700;">✕</button>
+                    </div>
+                </div>
+
+                <div id="livechat-messages" class="livechat-messages">
+                    <div style="color:#888;font-size:0.8rem;text-align:center;margin-top:20px;">Lade Live-Chat...</div>
+                </div>
+
+                <div class="livechat-emojis">
+                    <button type="button" class="emoji-quick-btn" data-emoji="🕵️">🕵️</button>
+                    <button type="button" class="emoji-quick-btn" data-emoji="💀">💀</button>
+                    <button type="button" class="emoji-quick-btn" data-emoji="🩸">🩸</button>
+                    <button type="button" class="emoji-quick-btn" data-emoji="🔍">🔍</button>
+                    <button type="button" class="emoji-quick-btn" data-emoji="😱">😱</button>
+                    <button type="button" class="emoji-quick-btn" data-emoji="⚖️">⚖️</button>
+                    <button type="button" class="emoji-quick-btn" data-emoji="🚨">🚨</button>
+                </div>
+
+                <form id="livechat-form" class="livechat-form">
+                    <input type="text" id="livechat-name" placeholder="Dein Name / Rufzeichen..." value="${gespeicherterName.replace(/"/g, '&quot;')}" required style="padding:7px 10px;font-size:0.78rem;background:#0b090b;border:1px solid #331b1e;color:#fca5a5;border-radius:6px;font-weight:600;">
+                    <div class="livechat-input-row">
+                        <input type="text" id="livechat-input" placeholder="Nachricht an alle schreiben..." required maxlength="400" style="flex:1;padding:9px 11px;font-size:0.83rem;background:#0b090b;border:1px solid #3b2024;color:#fff;border-radius:7px;">
+                        <button type="submit" id="livechat-send-btn" style="width:auto;padding:9px 15px;background:#b91c1c;color:#fff;border:none;border-radius:7px;font-weight:800;font-size:0.82rem;cursor:pointer;">Senden</button>
+                    </div>
+                </form>
+            </div>
+        `;
+        document.body.appendChild(chatContainer);
     }
 
     // Footer mit JSON-Backup-Download anlegen
@@ -501,9 +728,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // CLOUD-DATENBANK KONFIGURATION (JSONBin.io v3 API)
     // =========================================================================
     const BIN_ID = '6ad88424ac6210605a451855';
+    const CHAT_BIN_ID = '6ad9e4f3ffd5d16053823790';
     const dollar = String.fromCharCode(36);
     const MASTER_KEY = dollar + '2a' + dollar + '10' + dollar + 'j8SdQmHLglHfQa9O3s./YuXHtf/cYQ3Zjqs0nk3sWx4Bv19KCcUx2';
     const DATABASE_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+    const CHAT_DATABASE_URL = 'https://api.jsonbin.io/v3/b/' + CHAT_BIN_ID;
 
     let meinArchiv = [];
     let letzterDatenHash = '';
@@ -513,8 +742,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let aktiveSortierung = 'victims-desc';
     let aktuellerAnsichtsModus = 'grid';
 
-    // Aktualisiert die Optik des Admin-Buttons
+    // Aktualisiert die Optik des Admin-Buttons & Chat-Admin-Tools
     function aktualisiereAdminButton() {
+        const clearChatBtn = document.getElementById('livechat-clear-btn');
+        if (clearChatBtn) {
+            clearChatBtn.style.display = istAdminAktiv ? 'inline-block' : 'none';
+        }
         if (!adminBtn) return;
         if (istAdminAktiv) {
             adminBtn.classList.add('admin-unlocked');
@@ -536,15 +769,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.removeItem('archivAdminUnlocked');
                     aktualisiereAdminButton();
                     ansichtRendern(true);
+                    rendereChatNachrichten(true);
                 }
             } else {
-                const eingabe = prompt('👑 Bitte gib dein Administrator-Passwort ein, um den Vollzugriff für alle Beiträge freizuschalten:');
+                const eingabe = prompt('👑 Bitte gib dein Administrator-Passwort ein, um den Vollzugriff für alle Beiträge & den Livechat freizuschalten:');
                 if (eingabe === ADMIN_PASSWORT) {
                     istAdminAktiv = true;
                     localStorage.setItem('archivAdminUnlocked', 'true');
                     aktualisiereAdminButton();
                     ansichtRendern(true);
-                    alert('✅ Admin-Modus aktiviert! Du kannst jetzt jeden Beitrag direkt bearbeiten und löschen.');
+                    rendereChatNachrichten(true);
+                    alert('✅ Admin-Modus aktiviert! Du kannst jetzt jeden Beitrag direkt bearbeiten/löschen und schreibst im Livechat mit Admin-Krone.');
                 } else if (eingabe !== null) {
                     alert('❌ Falsches Admin-Passwort!');
                 }
@@ -557,10 +792,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const eintrag = meinArchiv[index];
         if (!eintrag) return false;
 
-        // 1. Admin ist bereits eingeloggt -> sofort erlaubt!
         if (istAdminAktiv) return true;
 
-        // 2. Besucher hat diesen Beitrag in diesem Browser selbst erstellt -> erlaubt!
         if (istEigenerBeitrag(eintrag)) {
             if (aktionName === 'löschen') {
                 return confirm(`Möchtest du deinen eigenen Beitrag „${eintrag.name || 'Fallakte'}“ wirklich unwiderruflich löschen?`);
@@ -568,7 +801,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
-        // 3. Fremder Beitrag -> Frage nach Ersteller-PIN (falls vergeben) ODER Admin-Passwort
         const erstellerName = eintrag.submittedBy || 'Archiv';
         const hatPin = Boolean(eintrag.authorPin && String(eintrag.authorPin).trim() !== '');
 
@@ -579,7 +811,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const codeEingabe = prompt(hinweisText);
         if (codeEingabe === null) return false;
 
-        // Falls Admin-Passwort eingegeben wurde -> erlauben & Admin-Modus direkt merken!
         if (codeEingabe === ADMIN_PASSWORT) {
             istAdminAktiv = true;
             localStorage.setItem('archivAdminUnlocked', 'true');
@@ -587,7 +818,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
 
-        // Falls der korrekte Ersteller-PIN dieses Beitrags eingegeben wurde -> erlauben!
         if (hatPin && codeEingabe.trim() === String(eintrag.authorPin).trim()) {
             return true;
         }
@@ -791,7 +1021,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (elBadge) elBadge.textContent = String(anzahlKillers);
     }
 
-    // Bearbeitungsmodus starten (nach bestandener Berechtigungsprüfung)
     function starteBearbeitung(index) {
         if (!pruefeZugriffsRecht(index, 'bearbeiten')) return;
 
@@ -858,7 +1087,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (titelInput) titelInput.focus();
     }
 
-    // Vollbild-Dossier-Modal öffnen
     function oeffneDossierModal(index) {
         const eintrag = meinArchiv[index];
         if (!eintrag) return;
@@ -1148,7 +1376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
 
-                    <!-- Meta-Badges (inkl. "Dein Beitrag"-Markierung) -->
+                    <!-- Meta-Badges -->
                     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
                         <span style="font-size:0.72rem;padding:3px 8px;border-radius:5px;background:#1c181c;border:1px solid #2e262e;color:#ccc;">📍 ${land}</span>
                         <span style="font-size:0.72rem;padding:3px 8px;border-radius:5px;background:#1c181c;border:1px solid #2e262e;color:#ccc;">⏱ ${zeitraum}</span>
@@ -1178,7 +1406,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>` : ''}
                 </div>
 
-                <!-- Karten-Footer: Schock-Button, Akte öffnen, Löschen & Bearbeiten (mit Schutz-Status) -->
+                <!-- Karten-Footer: Schock-Button, Akte öffnen, Löschen & Bearbeiten -->
                 <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #241a1d;margin-top:auto;gap:6px;flex-wrap:wrap;">
                     <div style="display:flex;align-items:center;gap:6px;">
                         <button type="button" class="btn-shock" data-index="${index}" title="Fall als besonders verstörend markieren (Live-Counter)" style="background:#1c1215;color:#fca5a5;border:1px solid #442026;padding:4px 9px;font-size:0.73rem;border-radius:6px;cursor:pointer;width:auto;">
@@ -1202,7 +1430,6 @@ document.addEventListener('DOMContentLoaded', () => {
             listenElement.appendChild(li);
         });
 
-        // Tag-Klick zum Filtern
         listenElement.querySelectorAll('.tag-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 const tag = chip.getAttribute('data-tag') || '';
@@ -1212,7 +1439,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Vollbild-Akte öffnen
         listenElement.querySelectorAll('.btn-open-dossier').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idx = Number(e.currentTarget.getAttribute('data-index'));
@@ -1220,7 +1446,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // 💀 Schock-Counter live hochzählen
         listenElement.querySelectorAll('.btn-shock').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const idx = Number(e.currentTarget.getAttribute('data-index'));
@@ -1233,7 +1458,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Löschen-Buttons (mit Kombi-Schutz)
         listenElement.querySelectorAll('.btn-loeschen').forEach((button) => {
             button.addEventListener('click', (e) => {
                 const indexZumLoeschen = Number(e.currentTarget.getAttribute('data-index'));
@@ -1243,7 +1467,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Bearbeiten-Buttons rechts neben Löschen (mit Kombi-Schutz)
         listenElement.querySelectorAll('.btn-bearbeiten').forEach((button) => {
             button.addEventListener('click', (e) => {
                 const indexZumBearbeiten = Number(e.currentTarget.getAttribute('data-index'));
@@ -1293,7 +1516,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return await response.json();
     }
 
-    // Formular Absenden (Neu anlegen ODER Bearbeiten)
     if (form) {
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -1371,7 +1593,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const aktualisierterEintrag = {
                     ...altesObjekt,
                     id: altesObjekt.id || 'killer-' + Date.now(),
-                    // Beim Neu-Erstellen wird automatisch die Browser-ID des Erstellers gespeichert; beim Bearbeiten bleibt sie erhalten
                     creatorId: altesObjekt.creatorId || meineErstellerId,
                     authorPin: authorPin || altesObjekt.authorPin || '',
                     name: name,
@@ -1449,6 +1670,230 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // =========================================================================
+    // LIVE-CHAT LOGIK (ECHTZEIT-CLOUD-SYNCHRONISATION)
+    // =========================================================================
+    let chatNachrichten = [];
+    let letzterChatHash = '';
+    let chatIstOffen = false;
+    let chatAmSenden = false;
+    let bekannteNachrichtenAnzahl = 0;
+
+    const chatFabBtn = document.getElementById('livechat-fab-btn');
+    const chatTopBtn = document.getElementById('btn-open-chat-top');
+    const chatWindow = document.getElementById('livechat-window');
+    const chatCloseBtn = document.getElementById('livechat-close-btn');
+    const chatClearBtn = document.getElementById('livechat-clear-btn');
+    const chatMessagesEl = document.getElementById('livechat-messages');
+    const chatForm = document.getElementById('livechat-form');
+    const chatNameInput = document.getElementById('livechat-name');
+    const chatTextInput = document.getElementById('livechat-input');
+    const chatUnreadBadge = document.getElementById('livechat-unread-badge');
+    const chatSubstatus = document.getElementById('livechat-substatus');
+
+    function toggleLiveChat(oeffnen) {
+        if (!chatWindow) return;
+        chatIstOffen = oeffnen !== undefined ? oeffnen : chatWindow.classList.contains('hidden');
+        if (chatIstOffen) {
+            chatWindow.classList.remove('hidden');
+            if (chatUnreadBadge) {
+                chatUnreadBadge.textContent = '0';
+                chatUnreadBadge.classList.add('hidden');
+            }
+            bekannteNachrichtenAnzahl = chatNachrichten.length;
+            if (chatMessagesEl) chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+            chatTextInput?.focus();
+        } else {
+            chatWindow.classList.add('hidden');
+        }
+    }
+
+    chatFabBtn?.addEventListener('click', () => toggleLiveChat());
+    chatTopBtn?.addEventListener('click', () => toggleLiveChat(true));
+    chatCloseBtn?.addEventListener('click', () => toggleLiveChat(false));
+
+    document.querySelectorAll('.emoji-quick-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!chatTextInput) return;
+            chatTextInput.value += btn.getAttribute('data-emoji') || '';
+            chatTextInput.focus();
+        });
+    });
+
+    function extrahiereChatListe(resBody) {
+        const rec = resBody && resBody.record !== undefined ? resBody.record : resBody;
+        if (rec && Array.isArray(rec.messages)) return rec.messages;
+        if (Array.isArray(rec)) return rec;
+        return [];
+    }
+
+    async function speichereChatInCloud(neueListe) {
+        // Behalte maximal die letzten 80 Nachrichten für schnelle Ladezeiten
+        const gekuerzt = neueListe.slice(-80);
+        const response = await fetch(CHAT_DATABASE_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Master-Key': MASTER_KEY
+            },
+            body: JSON.stringify({ messages: gekuerzt })
+        });
+        if (!response.ok) throw new Error(`Chat HTTP ${response.status}`);
+        return await response.json();
+    }
+
+    function rendereChatNachrichten(erzwingen = false) {
+        const hash = JSON.stringify(chatNachrichten) + '||' + istAdminAktiv;
+        if (!erzwingen && hash === letzterChatHash) return;
+        letzterChatHash = hash;
+
+        if (!chatMessagesEl) return;
+
+        if (chatNachrichten.length === 0) {
+            chatMessagesEl.innerHTML = '<div style="color:#777;font-size:0.8rem;text-align:center;margin-top:30px;">Noch keine Funk-Nachrichten. Schreibe die erste Nachricht!</div>';
+            return;
+        }
+
+        chatMessagesEl.innerHTML = chatNachrichten.map((msg, idx) => {
+            const eigene = msg.creatorId && msg.creatorId === meineErstellerId;
+            const darfLoeschen = istAdminAktiv || eigene;
+            const klassen = [
+                'chat-bubble',
+                eigene ? 'own-msg' : 'other-msg',
+                msg.isAdmin ? 'admin-msg' : ''
+            ].filter(Boolean).join(' ');
+
+            return `
+                <div class="${klassen}">
+                    <div class="chat-meta">
+                        <div>
+                            <span class="chat-author">${escapeHtml(msg.autor || 'Ermittler')}</span>
+                            ${msg.isAdmin ? '<span class="chat-admin-badge">👑 ADMIN</span>' : ''}
+                        </div>
+                        <div style="display:flex;align-items:center;gap:4px;">
+                            <span class="chat-time">${escapeHtml(msg.zeit || '')}</span>
+                            ${darfLoeschen ? `<button type="button" class="chat-del-btn" data-cidx="${idx}" title="Nachricht löschen">✕</button>` : ''}
+                        </div>
+                    </div>
+                    <div style="color:#f4f4f5;white-space:pre-wrap;">${escapeHtml(msg.text)}</div>
+                </div>
+            `;
+        }).join('');
+
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+
+        chatMessagesEl.querySelectorAll('.chat-del-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const cIdx = Number(btn.getAttribute('data-cidx'));
+                const zielMsg = chatNachrichten[cIdx];
+                if (!zielMsg) return;
+                if (!istAdminAktiv && zielMsg.creatorId !== meineErstellerId) return;
+
+                chatAmSenden = true;
+                try {
+                    chatNachrichten.splice(cIdx, 1);
+                    rendereChatNachrichten(true);
+                    await speichereChatInCloud(chatNachrichten);
+                } finally {
+                    chatAmSenden = false;
+                }
+            });
+        });
+    }
+
+    async function ladeChatNachrichten() {
+        if (chatAmSenden) return;
+        try {
+            const resp = await fetch(`${CHAT_DATABASE_URL}/latest`, {
+                method: 'GET',
+                headers: { 'X-Master-Key': MASTER_KEY },
+                cache: 'no-store'
+            });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const neueListe = extrahiereChatListe(data);
+
+            // Ungelesen-Zähler aktualisieren, wenn das Chatfenster geschlossen ist
+            if (!chatIstOffen && bekannteNachrichtenAnzahl > 0 && neueListe.length > bekannteNachrichtenAnzahl) {
+                const diff = neueListe.length - bekannteNachrichtenAnzahl;
+                if (chatUnreadBadge) {
+                    chatUnreadBadge.textContent = String(diff);
+                    chatUnreadBadge.classList.remove('hidden');
+                }
+            } else if (chatIstOffen || bekannteNachrichtenAnzahl === 0) {
+                bekannteNachrichtenAnzahl = neueListe.length;
+            }
+
+            chatNachrichten = neueListe;
+            rendereChatNachrichten();
+            if (chatSubstatus) {
+                chatSubstatus.textContent = `${chatNachrichten.length} Nachrichten im Funkkanal`;
+            }
+        } catch (_) {}
+    }
+
+    chatForm?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const nameVal = chatNameInput ? chatNameInput.value.trim() : 'Ermittler';
+        const textVal = chatTextInput ? chatTextInput.value.trim() : '';
+        if (!textVal) return;
+
+        localStorage.setItem('archivChatNickname', nameVal);
+        if (chatTextInput) chatTextInput.value = '';
+
+        const jetzt = new Date();
+        const neueMsg = {
+            id: 'msg-' + Date.now(),
+            autor: nameVal || 'Ermittler',
+            isAdmin: istAdminAktiv,
+            creatorId: meineErstellerId,
+            text: textVal,
+            zeit: jetzt.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr',
+            datum: jetzt.toLocaleDateString('de-DE')
+        };
+
+        chatAmSenden = true;
+        try {
+            const resp = await fetch(`${CHAT_DATABASE_URL}/latest`, {
+                method: 'GET',
+                headers: { 'X-Master-Key': MASTER_KEY },
+                cache: 'no-store'
+            });
+            if (resp.ok) {
+                chatNachrichten = extrahiereChatListe(await resp.json());
+            }
+            chatNachrichten.push(neueMsg);
+            bekannteNachrichtenAnzahl = chatNachrichten.length;
+            rendereChatNachrichten(true);
+            await speichereChatInCloud(chatNachrichten);
+        } catch (err) {
+            alert('Nachricht konnte nicht gesendet werden.');
+        } finally {
+            chatAmSenden = false;
+        }
+    });
+
+    // Admin: Gesamten Chatverlauf leeren
+    chatClearBtn?.addEventListener('click', async () => {
+        if (!istAdminAktiv) return;
+        if (!confirm('Möchtest du als Admin wirklich den gesamten Live-Chat leeren?')) return;
+        chatAmSenden = true;
+        try {
+            chatNachrichten = [{
+                id: 'msg-' + Date.now(),
+                autor: 'Archiv-Leitung',
+                isAdmin: true,
+                creatorId: meineErstellerId,
+                text: 'Der Funkkanal wurde vom Administrator bereinigt.',
+                zeit: new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'
+            }];
+            rendereChatNachrichten(true);
+            await speichereChatInCloud(chatNachrichten);
+        } finally {
+            chatAmSenden = false;
+        }
+    });
+
     // Event-Listener für Suche, Sortierung, Ansichts-Umschalter, Zufalls-Akte & JSON-Backup
     if (sucheInput) {
         sucheInput.addEventListener('input', (e) => {
@@ -1500,9 +1945,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') datenLaden(false);
+        if (document.visibilityState === 'visible') {
+            datenLaden(false);
+            ladeChatNachrichten();
+        }
     });
 
     datenLaden(true);
+    ladeChatNachrichten();
     setInterval(() => datenLaden(false), 5000);
+    setInterval(() => ladeChatNachrichten(), 3500);
 });
