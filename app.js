@@ -547,6 +547,66 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 gap: 7px;
             }
 
+            /* Fiktions-Disclaimer im Kopfbereich */
+            .disclaimer-banner-top {
+                background: linear-gradient(135deg, rgba(120, 53, 15, 0.38) 0%, rgba(45, 14, 18, 0.75) 100%);
+                border: 1px solid #f59e0b;
+                border-left: 5px solid #f59e0b;
+                border-radius: 10px;
+                padding: 13px 18px;
+                margin-bottom: 20px;
+                color: #fef3c7;
+                font-size: 0.86rem;
+                line-height: 1.55;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.55);
+            }
+            .disclaimer-banner-top strong {
+                color: #fbbf24;
+                text-transform: uppercase;
+                letter-spacing: 0.6px;
+            }
+
+            /* Rechtliche Links & Unterseiten (Impressum / Datenschutz) */
+            .legal-link-btn {
+                background: #171216;
+                color: #e5e5e5;
+                border: 1px solid #3d2227;
+                padding: 8px 14px;
+                border-radius: 8px;
+                font-size: 0.78rem;
+                font-weight: 600;
+                cursor: pointer;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                width: auto;
+                transition: all 0.2s ease;
+            }
+            .legal-link-btn:hover {
+                background: #7f1d1d;
+                color: #fff;
+                border-color: #ef4444;
+            }
+            .legal-modal-box {
+                background: #120e12;
+                border: 2px solid #991b1b;
+                border-radius: 16px;
+                max-width: 820px;
+                width: 100%;
+                padding: 28px 32px;
+                color: #e4e4e7;
+                box-shadow: 0 25px 60px rgba(0,0,0,0.95), 0 0 30px rgba(220,38,38,0.25);
+                max-height: 90vh;
+                overflow-y: auto;
+                line-height: 1.65;
+                font-size: 0.9rem;
+            }
+            .legal-modal-box h2 { color: #fff; margin-top: 0; font-size: 1.6rem; border-bottom: 1px solid #38181c; padding-bottom: 12px; }
+            .legal-modal-box h3 { color: #fca5a5; margin-top: 20px; margin-bottom: 6px; font-size: 1.05rem; }
+            .legal-modal-box p { margin: 6px 0 12px; color: #d4d4d8; }
+            .legal-modal-box a { color: #60a5fa; text-decoration: underline; }
+
             /* Footer Backup Bar */
             .archiv-footer {
                 margin-top: 45px;
@@ -593,7 +653,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         listenElement.classList.add('grid-mode');
     }
 
-            // Crime-Tape unter dem Header einfügen
+    // Crime-Tape & Fiktions-Disclaimer gut sichtbar im Kopfbereich einfügen
     const headerEl = document.querySelector('.header') || document.querySelector('h1');
     if (headerEl && !document.getElementById('crime-tape-banner')) {
         const tape = document.createElement('div');
@@ -601,6 +661,20 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         tape.className = 'crime-tape-bar';
         tape.textContent = '⚠ CRIME SCENE DO NOT CROSS // FORENSISCHES ARCHIV DES BÖSEN // STRENG VERTRAULICH ⚠';
         headerEl.parentNode.insertBefore(tape, headerEl.nextSibling);
+
+        const disclaimerBox = document.createElement('div');
+        disclaimerBox.id = 'fiktions-disclaimer-box';
+        disclaimerBox.className = 'disclaimer-banner-top';
+        disclaimerBox.innerHTML = `
+            <div>
+                <strong>⚠️ Wichtiger Hinweis:</strong> Das ‚Archiv des Bösen‘ ist ein rein fiktives Projekt zu Unterhaltungs- und Storytelling-Zwecken (z. B. für Pen-&amp;-Paper-Rollenspiele oder Autoren). Alle hier eingetragenen Fallakten, Namen und Ereignisse sind frei erfunden. Ähnlichkeiten mit lebenden oder verstorbenen realen Personen oder realen Kriminalfällen sind rein zufällig und nicht beabsichtigt.
+            </div>
+            <div style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;font-size:0.78rem;">
+                <a href="#impressum" style="color:#fbbf24;text-decoration:underline;font-weight:700;">📄 Impressum (§ 5 DDG)</a>
+                <a href="#datenschutz" style="color:#fbbf24;text-decoration:underline;font-weight:700;">🛡️ Datenschutzerklärung (DSGVO)</a>
+            </div>
+        `;
+        tape.parentNode.insertBefore(disclaimerBox, tape.nextSibling);
     }
 
     // 5. KPI-Karte für Live-Aufrufzähler & Klickzähler oben einfügen
@@ -860,18 +934,42 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         document.body.appendChild(chatContainer);
     }
 
-    // Footer mit JSON-Backup-Download anlegen
+    // Footer mit Impressum, Datenschutzerklärung (DSGVO) & JSON-Backup-Download anlegen
     if (hauptContainer && !document.getElementById('archiv-footer-bar')) {
         const footer = document.createElement('footer');
         footer.id = 'archiv-footer-bar';
         footer.className = 'archiv-footer';
         footer.innerHTML = `
-            <div>🩸 <strong>ARCHIV DES BÖSEN</strong> – Weltweite kriminologische Live-Datenbank (Auto-Sync alle 5 Sek.)</div>
-            <div style="display:flex;gap:10px;align-items:center;">
-                <button type="button" id="btn-export-json" class="btn-backup">💾 Komplettes Archiv als JSON-Backup sichern</button>
+            <div>
+                <div>🩸 <strong>ARCHIV DES BÖSEN</strong> – Rein fiktives Storytelling- &amp; Unterhaltungsprojekt</div>
+                <div style="font-size:0.73rem;color:#666;margin-top:3px;">Alle Fallakten, Namen und Ereignisse sind frei erfunden.</div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <a href="#impressum" id="btn-open-impressum" class="legal-link-btn">📄 Impressum</a>
+                <a href="#datenschutz" id="btn-open-datenschutz" class="legal-link-btn">🛡️ Datenschutzerklärung (DSGVO)</a>
+                <button type="button" id="btn-export-json" class="btn-backup">💾 JSON-Backup sichern</button>
             </div>
         `;
         hauptContainer.appendChild(footer);
+    }
+
+    // Unterseiten-Modal für Impressum & Datenschutzerklärung im Body anlegen
+    if (!document.getElementById('legal-page-modal')) {
+        const legalModal = document.createElement('div');
+        legalModal.id = 'legal-page-modal';
+        legalModal.className = 'dossier-modal-backdrop hidden';
+        legalModal.innerHTML = `
+            <div class="legal-modal-box" id="legal-modal-content"></div>
+        `;
+        document.body.appendChild(legalModal);
+        legalModal.addEventListener('click', (e) => {
+            if (e.target.id === 'legal-page-modal') {
+                legalModal.classList.add('hidden');
+                if (window.location.hash === '#impressum' || window.location.hash === '#datenschutz') {
+                    history.replaceState(null, '', window.location.pathname + window.location.search);
+                }
+            }
+        });
     }
 
     const statusIndicator = document.getElementById('status-indicator');
@@ -889,6 +987,15 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     const DATABASE_URL = FIREBASE_BASE_URL + '/archiv.json';
     const CHAT_DATABASE_URL = FIREBASE_BASE_URL + '/chat.json';
     const STATS_DATABASE_URL = FIREBASE_BASE_URL + '/stats.json';
+    const IMPRESSUM_DATABASE_URL = FIREBASE_BASE_URL + '/impressum.json';
+
+    let impressumDaten = {
+        name: '[Vorname Nachname des Betreibers oder vollständiger Firmenname]',
+        strasse: '[Straße und Hausnummer]',
+        ort: '[PLZ und Ort]',
+        telefon: '[Ihre Telefonnummer]',
+        email: '[Ihre E-Mail-Adresse]'
+    };
 
     let seitenStatistik = {
         totalViews: 342,
@@ -2606,6 +2713,229 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         a.remove();
     });
 
+    // =========================================================================
+    // IMPRESSUM (§ 5 DDG) & DATENSCHUTZERKLÄRUNG (DSGVO) UNTERSEITEN-LOGIK
+    // =========================================================================
+    async function ladeImpressumAusCloud() {
+        try {
+            const resp = await fetch(IMPRESSUM_DATABASE_URL, { method: 'GET', cache: 'no-store' });
+            if (resp.ok) {
+                const daten = await resp.json();
+                if (daten && typeof daten === 'object' && daten.name) {
+                    impressumDaten = { ...impressumDaten, ...daten };
+                }
+            }
+        } catch (_) {}
+    }
+
+    function oeffneRechtsSeite(typ) {
+        const modal = document.getElementById('legal-page-modal');
+        const content = document.getElementById('legal-modal-content');
+        if (!modal || !content) return;
+
+        const name = escapeHtml(impressumDaten.name);
+        const strasse = escapeHtml(impressumDaten.strasse);
+        const ort = escapeHtml(impressumDaten.ort);
+        const telefon = escapeHtml(impressumDaten.telefon);
+        const email = escapeHtml(impressumDaten.email);
+
+        if (typ === 'impressum') {
+            content.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+                    <div style="display:flex;gap:8px;">
+                        <button type="button" class="legal-link-btn" style="background:#7f1d1d;color:#fff;border-color:#ef4444;">📄 Impressum</button>
+                        <button type="button" id="switch-to-datenschutz" class="legal-link-btn">🛡️ Zur Datenschutzerklärung</button>
+                    </div>
+                    <button type="button" id="legal-close-top" style="width:auto;background:#33181b;color:#fff;border:1px solid #5c1d24;padding:7px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:700;">✕ Zurück zum Archiv</button>
+                </div>
+
+                <h2>Impressum</h2>
+
+                <h3>Angaben gemäß § 5 DDG</h3>
+                <p>
+                    <strong>${name}</strong><br>
+                    ${strasse}<br>
+                    ${ort}
+                </p>
+
+                <h3>Kontakt</h3>
+                <p>
+                    Telefon: ${telefon}<br>
+                    E-Mail: ${email}
+                </p>
+
+                <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
+                <p>
+                    <strong>${name}</strong><br>
+                    ${strasse}<br>
+                    ${ort}
+                </p>
+
+                <h3>Wichtiger Hinweis (Fiktions-Disclaimer)</h3>
+                <p>
+                    Das „Archiv des Bösen“ ist ein rein fiktives Projekt zu Unterhaltungs- und Storytelling-Zwecken (z. B. für Pen-&amp;-Paper-Rollenspiele oder Autoren). Alle hier eingetragenen Fallakten, Namen und Ereignisse sind frei erfunden. Ähnlichkeiten mit lebenden oder verstorbenen realen Personen oder realen Kriminalfällen sind rein zufällig und nicht beabsichtigt.
+                </p>
+
+                <h3>EU-Streitschlichtung</h3>
+                <p>
+                    Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+                    <a href="https://europa.eu" target="_blank" rel="noopener noreferrer">https://europa.eu</a>.<br>
+                    Unsere E-Mail-Adresse finden Sie oben im Impressum.
+                </p>
+
+                <h3>Verbraucherstreitbeilegung/Universalschlichtungsstelle</h3>
+                <p>
+                    Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+                </p>
+
+                <div style="margin-top:22px;padding-top:16px;border-top:1px solid #2e181b;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                    <button type="button" id="btn-edit-impressum" style="width:auto;background:#1f242d;color:#60a5fa;border:1px solid #2e3b4e;padding:8px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600;">
+                        ✏️ Impressum-Angaben eintragen / ändern (Admin)
+                    </button>
+                    <button type="button" id="legal-close-bottom" style="width:auto;background:#991b1b;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:0.82rem;cursor:pointer;font-weight:700;">Schließen</button>
+                </div>
+
+                <form id="impressum-edit-form" class="hidden" style="margin-top:16px;background:#0b090b;border:1px solid #3b2024;padding:16px;border-radius:10px;display:flex;flex-direction:column;gap:10px;">
+                    <h4 style="margin:0;color:#fca5a5;">👑 Impressum-Kontaktdaten bearbeiten (wird sofort weltweit gespeichert)</h4>
+                    <input type="text" id="imp-name" value="${name}" placeholder="Vorname Nachname oder Firmenname" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
+                    <input type="text" id="imp-strasse" value="${strasse}" placeholder="Straße und Hausnummer" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
+                    <input type="text" id="imp-ort" value="${ort}" placeholder="PLZ und Ort" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
+                    <input type="text" id="imp-tel" value="${telefon}" placeholder="Telefonnummer" style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
+                    <input type="text" id="imp-mail" value="${email}" placeholder="E-Mail-Adresse" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
+                    <button type="submit" style="width:auto;background:#059669;color:#fff;border:none;padding:9px 16px;border-radius:6px;font-weight:700;cursor:pointer;">💾 Impressum jetzt speichern</button>
+                </form>
+            `;
+        } else {
+            content.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
+                    <div style="display:flex;gap:8px;">
+                        <button type="button" id="switch-to-impressum" class="legal-link-btn">📄 Zum Impressum</button>
+                        <button type="button" class="legal-link-btn" style="background:#7f1d1d;color:#fff;border-color:#ef4444;">🛡️ Datenschutzerklärung (DSGVO)</button>
+                    </div>
+                    <button type="button" id="legal-close-top" style="width:auto;background:#33181b;color:#fff;border:1px solid #5c1d24;padding:7px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:700;">✕ Zurück zum Archiv</button>
+                </div>
+
+                <h2>Datenschutzerklärung (DSGVO)</h2>
+
+                <h3>1. Datenschutz auf einen Blick &amp; Verantwortliche Stelle</h3>
+                <p>
+                    Der Schutz Ihrer persönlichen Daten ist uns ein wichtiges Anliegen. Nachfolgend informieren wir Sie gemäß Art. 13 Datenschutz-Grundverordnung (DSGVO) darüber, welche personenbezogenen Daten beim Besuch unserer Website sowie beim Anlegen von Fallakten, Ermittler-Notizen und Live-Chat-Nachrichten verarbeitet werden.
+                </p>
+                <p>
+                    <strong>Verantwortliche Stelle im Sinne der DSGVO:</strong><br>
+                    ${name}<br>
+                    ${strasse}, ${ort}<br>
+                    E-Mail: ${email} | Telefon: ${telefon}
+                </p>
+
+                <h3>2. Hosting über GitHub Pages &amp; Server-Logfiles</h3>
+                <p>
+                    Diese Website wird über <strong>GitHub Pages</strong> (GitHub Inc., 88 Colin P Kelly Jr St, San Francisco, CA 94107, USA / GitHub B.V., Niederlande) bereitgestellt. Beim Aufruf unserer Website übermittelt Ihr Browser technisch notwendige Verbindungsdaten (insbesondere Ihre <strong>IP-Adresse</strong>, Datum und Uhrzeit des Abrufs, Browsertyp und Betriebssystem) an die Server von GitHub. Die Verarbeitung erfolgt auf Grundlage von <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> (berechtigtes Interesse an einer sicheren, stabilen und fehlerfreien Bereitstellung der Website).
+                </p>
+
+                <h3>3. Speicherung von Fallakten, Notizen, Live-Chat &amp; Aufrufzähler (Google Firebase)</h3>
+                <p>
+                    Wenn Sie auf unserer Website eine neue Fallakte anlegen, eine Ermittler-Notiz verfassen oder eine Nachricht im Live-Chat absenden, werden die von Ihnen eingegebenen Inhalte (z. B. gewählter Rufname/Pseudonym, Textbeiträge, Zeitstempel) in unserer Cloud-Datenbank <strong>Google Firebase Realtime Database</strong> (Serverstandort: <strong>Europäische Union / europe-west1</strong>, betrieben durch Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irland) gespeichert und für andere Besucher sichtbar gemacht.
+                </p>
+                <p>
+                    Beim Absenden und Abrufen der Datenbank-Einträge wird technisch bedingt Ihre <strong>IP-Adresse</strong> kurzzeitig an die Server von Google Firebase übermittelt, um die Datenübertragung durchzuführen. Rechtsgrundlage ist <strong>Art. 6 Abs. 1 lit. b und lit. f DSGVO</strong> (Bereitstellung der interaktiven Community-Funktionen). Wir empfehlen, bei Beiträgen und im Live-Chat lediglich ein Pseudonym (Vorname/Spitzname) und keine sensiblen Klardaten einzugeben.
+                </p>
+
+                <h3>4. Lokale Speicherung im Browser (LocalStorage)</h3>
+                <p>
+                    Wir setzen <strong>keine Werbe- oder Tracking-Cookies</strong> ein. Unsere Website nutzt ausschließlich den lokalen Speicher Ihres Browsers (<code>localStorage</code>), um Ihnen das Bearbeiten und Löschen Ihrer eigenen Beiträge zu ermöglichen (zufällige anonyme Ersteller-ID <code>archivCreatorId</code>, gemerkter Chat-Name sowie ein lokaler Zwischenspeicher der Fallakten). Diese Daten verbleiben in Ihrem Browser und können von Ihnen jederzeit über die Browsereinstellungen gelöscht werden (Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO).
+                </p>
+
+                <h3>5. Externe Bildquellen &amp; Bild-Proxy</h3>
+                <p>
+                    Sofern in Fallakten externe Bild-URLs eingebunden sind, werden diese über den datenschutzfreundlichen Caching-Proxy <code>wsrv.nl</code> (Cloudflare CDN) bzw. die jeweilige Bildquelle geladen. Dabei wird aus technischen Gründen Ihre IP-Adresse an den Bilddienst übertragen, um die Grafik in Ihrem Browser darzustellen.
+                </p>
+
+                <h3>6. Ihre Rechte nach der DSGVO (Auskunft, Löschung, Widerruf)</h3>
+                <p>
+                    Sie haben jederzeit das Recht auf unentgeltliche <strong>Auskunft</strong> über Ihre gespeicherten personenbezogenen Daten (Art. 15 DSGVO), auf <strong>Berichtigung</strong> (Art. 16 DSGVO), auf <strong>Löschung</strong> (Art. 17 DSGVO), auf <strong>Einschränkung der Verarbeitung</strong> (Art. 18 DSGVO) sowie ein <strong>Widerspruchsrecht</strong> gegen die Verarbeitung (Art. 21 DSGVO). Eigene Fallakten und Chat-Nachrichten können Sie zudem jederzeit direkt selbst über das Papierkorb-/Löschen-Symbol entfernen oder eine kurze Nachricht an die oben genannte E-Mail-Adresse senden. Darüber hinaus steht Ihnen ein Beschwerderecht bei einer Datenschutz-Aufsichtsbehörde zu (Art. 77 DSGVO).
+                </p>
+
+                <div style="margin-top:22px;padding-top:16px;border-top:1px solid #2e181b;display:flex;justify-content:flex-end;">
+                    <button type="button" id="legal-close-bottom" style="width:auto;background:#991b1b;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:0.82rem;cursor:pointer;font-weight:700;">Schließen</button>
+                </div>
+            `;
+        }
+
+        modal.classList.remove('hidden');
+
+        const schliessen = () => {
+            modal.classList.add('hidden');
+            if (window.location.hash === '#impressum' || window.location.hash === '#datenschutz') {
+                history.replaceState(null, '', window.location.pathname + window.location.search);
+            }
+        };
+
+        document.getElementById('legal-close-top')?.addEventListener('click', schliessen);
+        document.getElementById('legal-close-bottom')?.addEventListener('click', schliessen);
+        document.getElementById('switch-to-datenschutz')?.addEventListener('click', () => {
+            window.location.hash = 'datenschutz';
+            oeffneRechtsSeite('datenschutz');
+        });
+        document.getElementById('switch-to-impressum')?.addEventListener('click', () => {
+            window.location.hash = 'impressum';
+            oeffneRechtsSeite('impressum');
+        });
+
+        document.getElementById('btn-edit-impressum')?.addEventListener('click', () => {
+            if (!istAdminAktiv) {
+                const pw = prompt('👑 Bitte Admin-Passwort eingeben, um deine Impressum-Angaben einzutragen:');
+                if (pw !== ADMIN_PASSWORT) {
+                    if (pw !== null) alert('❌ Falsches Admin-Passwort!');
+                    return;
+                }
+                istAdminAktiv = true;
+                localStorage.setItem('archivAdminUnlocked', 'true');
+                aktualisiereAdminButton();
+            }
+            document.getElementById('impressum-edit-form')?.classList.toggle('hidden');
+        });
+
+        document.getElementById('impressum-edit-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            impressumDaten = {
+                name: document.getElementById('imp-name')?.value.trim() || impressumDaten.name,
+                strasse: document.getElementById('imp-strasse')?.value.trim() || impressumDaten.strasse,
+                ort: document.getElementById('imp-ort')?.value.trim() || impressumDaten.ort,
+                telefon: document.getElementById('imp-tel')?.value.trim() || impressumDaten.telefon,
+                email: document.getElementById('imp-mail')?.value.trim() || impressumDaten.email
+            };
+            try {
+                await fetch(IMPRESSUM_DATABASE_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(impressumDaten)
+                });
+                alert('✅ Impressum-Angaben erfolgreich weltweit gespeichert!');
+                oeffneRechtsSeite('impressum');
+            } catch (_) {
+                alert('Fehler beim Speichern des Impressums.');
+            }
+        });
+    }
+
+    document.getElementById('btn-open-impressum')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.hash = 'impressum';
+        oeffneRechtsSeite('impressum');
+    });
+
+    document.getElementById('btn-open-datenschutz')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.hash = 'datenschutz';
+        oeffneRechtsSeite('datenschutz');
+    });
+
+    window.addEventListener('hashchange', () => {
+        if (window.location.hash === '#impressum') oeffneRechtsSeite('impressum');
+        if (window.location.hash === '#datenschutz') oeffneRechtsSeite('datenschutz');
+    });
+
     if (refreshBtn) {
         refreshBtn.addEventListener('click', () => {
             datenLaden(true);
@@ -2626,6 +2956,10 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     datenLaden(true);
     ladeChatNachrichten();
     ladeUndZaehleSeitenAufrufe(true);
+    ladeImpressumAusCloud().then(() => {
+        if (window.location.hash === '#impressum') oeffneRechtsSeite('impressum');
+        if (window.location.hash === '#datenschutz') oeffneRechtsSeite('datenschutz');
+    });
     setInterval(() => {
         if (document.visibilityState === 'visible') {
             datenLaden(false);
