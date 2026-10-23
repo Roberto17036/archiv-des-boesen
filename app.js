@@ -281,15 +281,14 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 background: radial-gradient(circle at center, #1f1216 0%, #0b080b 100%);
                 border: 1px solid #3d1b20;
                 border-radius: 12px;
-                padding: 14px;
+                padding: 16px;
                 margin-bottom: 16px;
                 position: relative;
             }
             .dossier-photo-showcase img {
+                height: 300px;
                 max-width: 100%;
-                max-height: 340px;
                 width: auto;
-                height: auto;
                 object-fit: contain;
                 border-radius: 8px;
                 border: 2px solid #7f1d1d;
@@ -325,8 +324,9 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             }
             .image-lightbox-backdrop.hidden { display: none !important; }
             .image-lightbox-backdrop img {
+                height: 78vh;
                 max-width: 92vw;
-                max-height: 82vh;
+                width: auto;
                 object-fit: contain;
                 border: 2px solid #ef4444;
                 border-radius: 10px;
@@ -1334,6 +1334,16 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             .replace(/'/g, '&#039;');
     }
 
+    function optimiereBildUrl(url, breite = 700) {
+        if (!url) return '';
+        const roh = String(url).trim();
+        if (!roh) return '';
+        if (roh.includes('wikimedia.org') || roh.includes('wikipedia.org')) {
+            return `https://wsrv.nl/?url=${encodeURIComponent(roh)}&w=${breite}`;
+        }
+        return roh;
+    }
+
     function setzeStatus(typ, nachricht) {
         if (statusIndicator) {
             if (typ === 'online') {
@@ -1693,10 +1703,11 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         const eingereichtVon = escapeHtml(eintrag.submittedBy || 'Forensik-Archiv');
         const darfDirektBearbeiten = istAdminAktiv || istEigenerBeitrag(eintrag);
 
-        const groessesFotoHtml = eintrag.imageUrl
+        const bildUrlGross = optimiereBildUrl(eintrag.imageUrl, 900);
+        const groessesFotoHtml = bildUrlGross
             ? `
             <div class="dossier-photo-showcase">
-                <img id="modal-large-photo" src="${escapeHtml(eintrag.imageUrl)}" alt="Fahndungsfoto ${name}" title="Klicken für Vollbild-Ansicht" onerror="this.parentElement.style.display='none'">
+                <img id="modal-large-photo" src="${escapeHtml(bildUrlGross)}" alt="Fahndungsfoto ${name}" title="Klicken für Vollbild-Ansicht" onerror="if(!this.dataset.retry){this.dataset.retry='1';this.src='https://wsrv.nl/?url='+encodeURIComponent('${escapeHtml(eintrag.imageUrl)}');}else{this.parentElement.style.display='none';}">
                 <span class="dossier-photo-caption">🔍 FAHNDUNGSFOTO // BEWEISAUFNAHME (Bild anklicken für Vollbild-Zoom)</span>
             </div>`
             : '';
@@ -1791,7 +1802,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             const lbImg = document.getElementById('lightbox-full-img');
             const lbCap = document.getElementById('lightbox-full-caption');
             if (lb && lbImg && eintrag.imageUrl) {
-                lbImg.src = eintrag.imageUrl;
+                lbImg.src = optimiereBildUrl(eintrag.imageUrl, 1200);
                 if (lbCap) lbCap.textContent = `${eintrag.name || ''} – „${eintrag.alias || 'Fallakte'}“`;
                 lb.classList.remove('hidden');
             }
@@ -1950,9 +1961,10 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
 
             const eigener = istEigenerBeitrag(eintrag);
             const darfDirektBearbeiten = istAdminAktiv || eigener;
+            const kartenBildUrl = optimiereBildUrl(eintrag.imageUrl, 300);
 
-            const mugshotHtml = eintrag.imageUrl
-                ? `<div class="mugshot-box btn-open-dossier" data-index="${index}" title="Klicken, um Akte & großes Foto zu öffnen"><img src="${escapeHtml(eintrag.imageUrl)}" alt="${name}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem;\\'>🕵️</span>'"></div>`
+            const mugshotHtml = kartenBildUrl
+                ? `<div class="mugshot-box btn-open-dossier" data-index="${index}" title="Klicken, um Akte & großes Foto zu öffnen"><img src="${escapeHtml(kartenBildUrl)}" alt="${name}" onerror="if(!this.dataset.retry){this.dataset.retry='1';this.src='https://wsrv.nl/?url='+encodeURIComponent('${escapeHtml(eintrag.imageUrl)}');}else{this.outerHTML='<span style=\\'font-size:1.5rem;\\'>🕵️</span>';}"></div>`
                 : `<div class="mugshot-box btn-open-dossier" data-index="${index}" title="Forensisches Dossier-Profil öffnen">
                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.6">
                        <path d="M12 2C7.03 2 3 6.03 3 11c0 3.32 1.8 6.22 4.47 7.78V21a1 1 0 001 1h7.06a1 1 0 001-1v-2.22C19.2 17.22 21 14.32 21 11c0-4.97-4.03-9-9-9zM9 12a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm6 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 17v3M14 17v3"/>
@@ -1962,6 +1974,8 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             const li = document.createElement('li');
             li.className = `archiv-item ${eigener ? 'own-entry' : ''}`;
             li.setAttribute('data-year', String(jahr));
+            li.setAttribute('data-index', String(index));
+            li.style.cursor = 'pointer';
             li.innerHTML = `
                 <div>
                     <!-- Stempel & Gefahrenstufe oben -->
@@ -2044,7 +2058,8 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         });
 
         listenElement.querySelectorAll('.tag-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
+            chip.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const tag = chip.getAttribute('data-tag') || '';
                 suchbegriff = tag.toLowerCase();
                 if (sucheInput) sucheInput.value = tag;
@@ -2054,13 +2069,23 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
 
         listenElement.querySelectorAll('.btn-open-dossier').forEach(btn => {
             btn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const idx = Number(e.currentTarget.getAttribute('data-index'));
+                oeffneDossierModal(idx);
+            });
+        });
+
+        listenElement.querySelectorAll('.archiv-item').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('button') || e.target.closest('.tag-chip')) return;
+                const idx = Number(card.getAttribute('data-index'));
                 oeffneDossierModal(idx);
             });
         });
 
         listenElement.querySelectorAll('.btn-shock').forEach(btn => {
             btn.addEventListener('click', async (e) => {
+                e.stopPropagation();
                 const idx = Number(e.currentTarget.getAttribute('data-index'));
                 if (!meinArchiv[idx]) return;
                 meinArchiv[idx].shockCount = (Number(meinArchiv[idx].shockCount) || 0) + 1;
@@ -2073,6 +2098,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
 
         listenElement.querySelectorAll('.btn-loeschen').forEach((button) => {
             button.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const indexZumLoeschen = Number(e.currentTarget.getAttribute('data-index'));
                 if (pruefeZugriffsRecht(indexZumLoeschen, 'löschen')) {
                     eintragLoeschen(indexZumLoeschen);
@@ -2082,6 +2108,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
 
         listenElement.querySelectorAll('.btn-bearbeiten').forEach((button) => {
             button.addEventListener('click', (e) => {
+                e.stopPropagation();
                 const indexZumBearbeiten = Number(e.currentTarget.getAttribute('data-index'));
                 starteBearbeitung(indexZumBearbeiten);
             });
