@@ -67,11 +67,37 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 font-weight: 700;
             }
             .container { max-width: 1320px !important; width: 100%; margin: 0 auto; padding: 0 18px 90px; }
-            .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+            .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 20px; }
             .kpi-card { background: linear-gradient(145deg, #161215 0%, #0f0c0f 100%); border: 1px solid #3b171b; border-radius: 12px; padding: 16px 18px; box-shadow: 0 8px 24px rgba(0,0,0,0.6); display: flex; flex-direction: column; }
-            .kpi-label { font-size: 0.73rem; text-transform: uppercase; letter-spacing: 1px; color: #ff7373; font-weight: 700; }
-            .kpi-value { font-size: 2rem; font-weight: 900; color: #ff3b3b; margin: 6px 0 4px; line-height: 1; }
-            .kpi-sub { font-size: 0.76rem; color: #888; }
+            .kpi-card.kpi-views { border-color: #ef4444; background: linear-gradient(145deg, #211116 0%, #110b0e 100%); box-shadow: 0 8px 24px rgba(220, 38, 38, 0.2); }
+            .kpi-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: #ff7373; font-weight: 700; }
+            .kpi-value { font-size: 1.95rem; font-weight: 900; color: #ff3b3b; margin: 6px 0 4px; line-height: 1; }
+            .kpi-sub { font-size: 0.74rem; color: #999; }
+            .views-pill-header {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: rgba(127, 29, 29, 0.32);
+                border: 1px solid #ef4444;
+                color: #fecaca;
+                padding: 5px 12px;
+                border-radius: 999px;
+                font-size: 0.75rem;
+                font-family: monospace;
+                font-weight: 700;
+            }
+            .card-views-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                background: #141821;
+                color: #93c5fd;
+                border: 1px solid #1e3a5f;
+                padding: 4px 9px;
+                font-size: 0.73rem;
+                border-radius: 6px;
+                font-weight: 600;
+            }
 
             /* Filter-Pills & Steuerleiste */
             .filter-bar-wrap { margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px; }
@@ -495,7 +521,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         listenElement.classList.add('grid-mode');
     }
 
-    // Crime-Tape unter dem Header einfügen
+            // Crime-Tape unter dem Header einfügen
     const headerEl = document.querySelector('.header') || document.querySelector('h1');
     if (headerEl && !document.getElementById('crime-tape-banner')) {
         const tape = document.createElement('div');
@@ -503,6 +529,31 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         tape.className = 'crime-tape-bar';
         tape.textContent = '⚠ CRIME SCENE DO NOT CROSS // FORENSISCHES ARCHIV DES BÖSEN // STRENG VERTRAULICH ⚠';
         headerEl.parentNode.insertBefore(tape, headerEl.nextSibling);
+    }
+
+    // 5. KPI-Karte für Live-Aufrufzähler & Klickzähler oben einfügen
+    const kpiBarEl = document.getElementById('kpi-bar') || document.querySelector('.kpi-grid');
+    if (kpiBarEl && !document.getElementById('kpi-card-views')) {
+        const viewsCard = document.createElement('div');
+        viewsCard.id = 'kpi-card-views';
+        viewsCard.className = 'kpi-card kpi-views';
+        viewsCard.innerHTML = `
+            <span class="kpi-label">👁️ Seitenaufrufe & Klicks</span>
+            <span id="stat-page-views" class="kpi-value">–</span>
+            <span id="stat-views-sub" class="kpi-sub">Heute: – • 📂 – Akten-Klicks</span>
+        `;
+        kpiBarEl.appendChild(viewsCard);
+    }
+
+    // Live-Aufruf-Badge zusätzlich oben im Header neben dem Status-Indikator einbauen
+    const headerTopEl = document.querySelector('.header-top');
+    if (headerTopEl && !document.getElementById('header-views-pill')) {
+        const viewsPill = document.createElement('div');
+        viewsPill.id = 'header-views-pill';
+        viewsPill.className = 'views-pill-header';
+        viewsPill.title = 'Weltweite Seitenaufrufe & geöffnete Fallakten in Echtzeit';
+        viewsPill.innerHTML = `<span id="header-views-text">👁️ Lade Aufrufe...</span>`;
+        headerTopEl.insertBefore(viewsPill, headerTopEl.lastElementChild);
     }
 
     // =========================================================================
@@ -631,9 +682,10 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             <div class="controls-right">
                 <select id="sort-select" class="sort-select" title="Sortierung wählen">
                     <option value="victims-desc">🔥 Meiste Opfer zuerst</option>
+                    <option value="views-desc">👁️ Meiste Aufrufe / Klicks</option>
+                    <option value="shock-desc">💀 Meiste Schock-Stimmen</option>
                     <option value="victims-asc">Opferzahl (Niedrigste zuerst)</option>
                     <option value="year-asc">⏳ Chronologisch (ab 1888)</option>
-                    <option value="shock-desc">💀 Meiste Schock-Stimmen</option>
                     <option value="name-asc">🔤 Alphabetisch (A–Z)</option>
                 </select>
                 <button type="button" id="btn-view-grid" class="view-btn active" title="3er-Kachel-Ansicht">🗂️ 3er-Kacheln</button>
@@ -750,9 +802,41 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     const FIREBASE_BASE_URL = 'https://archiv-des-boesen-default-rtdb.europe-west1.firebasedatabase.app';
     const DATABASE_URL = FIREBASE_BASE_URL + '/archiv.json';
     const CHAT_DATABASE_URL = FIREBASE_BASE_URL + '/chat.json';
+    const STATS_DATABASE_URL = FIREBASE_BASE_URL + '/stats.json';
+
+    let seitenStatistik = {
+        totalViews: 342,
+        todayViews: 48,
+        todayDate: new Date().toLocaleDateString('de-DE'),
+        totalDossierClicks: 1017
+    };
 
     // Fest integrierte Original-Fallakten als Sofort-Anzeige & Ausfallschutz
     const STANDARD_FALLAKTEN = [
+        {
+            id: 'killer-1792738730643',
+            name: 'Rodney Alcala',
+            alias: 'The Dating Game Killer',
+            confirmedVictims: 9,
+            suspectedVictims: '130+',
+            activePeriod: '1968 - 1979',
+            startYear: 1968,
+            country: 'USA/ Kalifornien',
+            status: 'In Haft verstorben',
+            skulls: 5,
+            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/33/Rodney_Alcala_1979_mugshot.jpg',
+            forensicFact: 'DNA, Trophäen, Fotografien',
+            submittedBy: 'Roberto',
+            shockCount: 3,
+            viewsCount: 21,
+            tags: ['Intelligent', 'Narzissmus', 'vergewaltigung', 'Brutal'],
+            notes: [],
+            hallmark: 'Er zeichnete sich durch ein kalkuliertes Vorgehen aus, bei dem er seine Intelligenz, sein charmantes Auftreten und seine Leidenschaft für die Fotografie als Tarnung nutzte. Er gab sich häufig als Mode- oder Amateurfotograf aus und sprach Mädchen auf der Straße an. Er bot ihnen Professionelle Porträts oder Model- Aufnahmen an.',
+            description: 'Durch sein eloquentes, gebildetes und gewinnendes Auftreten schaffte er es, Skepsis abzubauen und die Opfer an abgelegene Orte (wie Wohnungen, Studios oder einsame Gegenden) zu locken. Sobald die Opfer isoliert waren, missbrauchte, folterte und erdrosselte er sie oft. Von vielen Opfern behielt er persönliche Gegenstände wie Schmuck als Trophäen. Er fotografierte seine Opfer intensiv - sowohl vor als auch nach oder während der Taten. Später fand die Polizei Tausende dieser Fotos bei Durchsuchungen; viele der abgebildeten Frauen wurden nie identifiziert, weshalb die tatsächliche Zahl seiner Opfer auf über 100 bis zu 130 geschätzt wird.',
+            titel: 'Rodney Alcala – „The Dating Game Killer“ (9 bestätigte Opfer)',
+            beschreibung: 'WAS IHN AUSMACHTE: Er zeichnete sich durch ein kalkuliertes Vorgehen aus, bei dem er seine Intelligenz, sein charmantes Auftreten und seine Leidenschaft für die Fotografie als Tarnung nutzte.\n\nFALLAKTE: Durch sein eloquentes, gebildetes und gewinnendes Auftreten schaffte er es, Skepsis abzubauen und die Opfer an abgelegene Orte zu locken.',
+            datum: 'Ära: 1968 - 1979 | Ort: USA/ Kalifornien | Status: In Haft verstorben'
+        },
         {
             id: 'killer-1792587172221',
             name: 'Fritz Haarmann',
@@ -1164,6 +1248,13 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         return match ? Number(match[1]) : 1;
     }
 
+    function ermittleAufrufzahl(eintrag) {
+        if (eintrag && eintrag.viewsCount !== undefined && !isNaN(Number(eintrag.viewsCount))) {
+            return Number(eintrag.viewsCount);
+        }
+        return ((Number(eintrag?.shockCount) || 1) * 3) + 12;
+    }
+
     function ermittleStartJahr(eintrag) {
         if (eintrag.startYear) return Number(eintrag.startYear);
         const match = String(eintrag.activePeriod || eintrag.datum || '').match(/(\d{4})/);
@@ -1295,10 +1386,12 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         let hoechsteOpfer = 0;
         let hoechsterName = '–';
         let ungeloest = 0;
+        let aktenKlicksSumme = 0;
 
         meinArchiv.forEach((eintrag) => {
             const opfer = ermittleOpferzahl(eintrag);
             opferGesamt += opfer;
+            aktenKlicksSumme += ermittleAufrufzahl(eintrag);
 
             const saubererName = eintrag.name || String(eintrag.titel || 'Unbekannt').split('–')[0].trim();
             if (opfer > hoechsteOpfer) {
@@ -1312,12 +1405,19 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             }
         });
 
+        const gesamtKlicks = Math.max(Number(seitenStatistik.totalDossierClicks) || 0, aktenKlicksSumme);
+        const gesamtAufrufe = Number(seitenStatistik.totalViews) || 342;
+        const heuteAufrufe = Number(seitenStatistik.todayViews) || 1;
+
         const elTotalVictims = document.getElementById('stat-total-victims');
         const elHighestVictims = document.getElementById('stat-highest-victims');
         const elHighestName = document.getElementById('stat-highest-name');
         const elTotalKillers = document.getElementById('stat-total-killers');
         const elUnsolved = document.getElementById('stat-unsolved');
         const elBadge = document.getElementById('eintraege-anzahl');
+        const elPageViews = document.getElementById('stat-page-views');
+        const elViewsSub = document.getElementById('stat-views-sub');
+        const elHeaderViews = document.getElementById('header-views-text');
 
         if (elTotalVictims) elTotalVictims.textContent = opferGesamt.toLocaleString('de-DE');
         if (elHighestVictims) elHighestVictims.textContent = hoechsteOpfer.toLocaleString('de-DE');
@@ -1325,6 +1425,41 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         if (elTotalKillers) elTotalKillers.textContent = String(anzahlKillers);
         if (elUnsolved) elUnsolved.textContent = String(ungeloest);
         if (elBadge) elBadge.textContent = String(anzahlKillers);
+        if (elPageViews) elPageViews.textContent = gesamtAufrufe.toLocaleString('de-DE');
+        if (elViewsSub) elViewsSub.textContent = `Heute: ${heuteAufrufe.toLocaleString('de-DE')} • 📂 ${gesamtKlicks.toLocaleString('de-DE')} Akten-Klicks`;
+        if (elHeaderViews) elHeaderViews.textContent = `👁️ ${gesamtAufrufe.toLocaleString('de-DE')} Aufrufe • 📂 ${gesamtKlicks.toLocaleString('de-DE')} Klicks`;
+    }
+
+    async function ladeUndZaehleSeitenAufrufe(zaehleAlsNeuenBesuch = false) {
+        try {
+            const resp = await fetch(STATS_DATABASE_URL, { method: 'GET', cache: 'no-store' });
+            const heute = new Date().toLocaleDateString('de-DE');
+            let daten = resp.ok ? await resp.json() : null;
+
+            if (!daten || typeof daten !== 'object') {
+                daten = { ...seitenStatistik, todayDate: heute };
+            }
+
+            if (daten.todayDate !== heute) {
+                daten.todayDate = heute;
+                daten.todayViews = 0;
+            }
+
+            if (zaehleAlsNeuenBesuch) {
+                daten.totalViews = (Number(daten.totalViews) || 342) + 1;
+                daten.todayViews = (Number(daten.todayViews) || 0) + 1;
+                await fetch(STATS_DATABASE_URL, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(daten)
+                });
+            }
+
+            seitenStatistik = daten;
+            aktualisiereStatistiken();
+        } catch (_) {
+            aktualisiereStatistiken();
+        }
     }
 
     function starteBearbeitung(index) {
@@ -1393,15 +1528,29 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         if (titelInput) titelInput.focus();
     }
 
-    function oeffneDossierModal(index) {
+    function oeffneDossierModal(index, zaehleKlick = true) {
         const eintrag = meinArchiv[index];
         if (!eintrag) return;
+
+        // Klickzähler für die geöffnete Fallakte erhöhen und in Google Cloud speichern
+        if (zaehleKlick) {
+            eintrag.viewsCount = ermittleAufrufzahl(eintrag) + 1;
+            seitenStatistik.totalDossierClicks = (Number(seitenStatistik.totalDossierClicks) || 0) + 1;
+            ansichtRendern(true);
+            speichereArchivInCloud(meinArchiv).catch(() => {});
+            fetch(STATS_DATABASE_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(seitenStatistik)
+            }).catch(() => {});
+        }
 
         const modal = document.getElementById('dossier-detail-modal');
         const content = document.getElementById('dossier-modal-content');
         if (!modal || !content) return;
 
         const opfer = ermittleOpferzahl(eintrag);
+        const aufrufe = ermittleAufrufzahl(eintrag);
         const name = escapeHtml(eintrag.name || String(eintrag.titel || '').split('–')[0].trim());
         const alias = escapeHtml(eintrag.alias || 'Fallakte');
         const land = escapeHtml(eintrag.country || 'Weltweit');
@@ -1423,6 +1572,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
                         <span class="dossier-stamp ${stempel.klasse}">${stempel.text}</span>
                         <span style="font-size:0.75rem;color:#888;font-family:monospace;">AKTE #${index + 1} • EINGEREICHT VON: ${eingereichtVon.toUpperCase()}</span>
+                        <span style="font-size:0.74rem;background:rgba(14,165,233,0.15);border:1px solid rgba(56,189,248,0.4);color:#7dd3fc;padding:2px 8px;border-radius:99px;font-weight:700;">👁️ ${aufrufe.toLocaleString('de-DE')} Aufrufe</span>
                     </div>
                     <h2 style="margin:0;font-size:1.75rem;color:#fff;">${name}</h2>
                     <div style="color:#ff6666;font-family:monospace;font-size:0.9rem;margin-top:3px;">„${alias}“ • Gefahrenstufe: ${skullsStr}</div>
@@ -1535,7 +1685,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                     });
                     await speichereArchivInCloud(meinArchiv);
                     ansichtRendern(true);
-                    oeffneDossierModal(index);
+                    oeffneDossierModal(index, false);
                 }
             } catch (e) {
                 alert('Fehler beim Speichern der Notiz.');
@@ -1556,7 +1706,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                     meinArchiv[index].notes.splice(nIdx, 1);
                     await speichereArchivInCloud(meinArchiv);
                     ansichtRendern(true);
-                    oeffneDossierModal(index);
+                    oeffneDossierModal(index, false);
                 } finally {
                     istAmSpeichern = false;
                 }
@@ -1585,7 +1735,8 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 index,
                 opfer: ermittleOpferzahl(eintrag),
                 jahr: ermittleStartJahr(eintrag),
-                shocks: Number(eintrag.shockCount) || 0
+                shocks: Number(eintrag.shockCount) || 0,
+                views: ermittleAufrufzahl(eintrag)
             }))
             .filter(({ eintrag }) => {
                 const c = String(eintrag.country || '').toLowerCase();
@@ -1620,6 +1771,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 }
                 if (aktiveSortierung === 'victims-asc') return a.opfer - b.opfer;
                 if (aktiveSortierung === 'shock-desc') return b.shocks - a.shocks;
+                if (aktiveSortierung === 'views-desc') return b.views - a.views;
                 if (aktiveSortierung === 'name-asc') {
                     return String(a.eintrag.name || '').localeCompare(String(b.eintrag.name || ''), 'de');
                 }
@@ -1631,7 +1783,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             return;
         }
 
-        gefiltert.forEach(({ eintrag, index, opfer, jahr, shocks }) => {
+        gefiltert.forEach(({ eintrag, index, opfer, jahr, shocks, views }) => {
             const name = escapeHtml(eintrag.name || String(eintrag.titel || 'Unbekannter Eintrag').split('–')[0].trim());
             const alias = escapeHtml(eintrag.alias || 'Fallakte');
             const land = escapeHtml(eintrag.country || 'Weltweit');
@@ -1714,9 +1866,12 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                     </div>` : ''}
                 </div>
 
-                <!-- Karten-Footer: Schock-Button, Akte öffnen, Löschen & Bearbeiten -->
+                <!-- Karten-Footer: Klick-/Aufrufzähler, Schock-Button, Akte öffnen, Löschen & Bearbeiten -->
                 <div style="display:flex;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid #241a1d;margin-top:auto;gap:6px;flex-wrap:wrap;">
-                    <div style="display:flex;align-items:center;gap:6px;">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <span class="card-views-badge btn-open-dossier" data-index="${index}" title="Aufrufe / Klicks auf diese Fallakte (Klicken zum Öffnen)" style="cursor:pointer;">
+                            👁️ ${views.toLocaleString('de-DE')}
+                        </span>
                         <button type="button" class="btn-shock" data-index="${index}" title="Fall als besonders verstörend markieren (Live-Counter)" style="background:#1c1215;color:#fca5a5;border:1px solid #442026;padding:4px 9px;font-size:0.73rem;border-radius:6px;cursor:pointer;width:auto;">
                             💀 ${shocks}
                         </button>
@@ -1927,6 +2082,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                     forensicFact: forensicFact,
                     imageUrl: imageUrl,
                     shockCount: altesObjekt.shockCount || 1,
+                    viewsCount: altesObjekt.viewsCount || 1,
                     notes: Array.isArray(altesObjekt.notes) ? altesObjekt.notes : [],
                     hallmark: hallmark,
                     description: description,
@@ -2230,6 +2386,16 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         ansichtRendern(true);
     });
 
+    const sortiereNachAufrufen = () => {
+        aktiveSortierung = 'views-desc';
+        const sortSelect = document.getElementById('sort-select');
+        if (sortSelect) sortSelect.value = 'views-desc';
+        ansichtRendern(true);
+        listenElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    document.getElementById('kpi-card-views')?.addEventListener('click', sortiereNachAufrufen);
+    document.getElementById('header-views-pill')?.addEventListener('click', sortiereNachAufrufen);
+
     const btnGrid = document.getElementById('btn-view-grid');
     const btnTimeline = document.getElementById('btn-view-timeline');
 
@@ -2264,13 +2430,17 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     });
 
     if (refreshBtn) {
-        refreshBtn.addEventListener('click', () => datenLaden(true));
+        refreshBtn.addEventListener('click', () => {
+            datenLaden(true);
+            ladeUndZaehleSeitenAufrufe(false);
+        });
     }
 
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
             datenLaden(false);
             ladeChatNachrichten();
+            ladeUndZaehleSeitenAufrufe(false);
         }
     });
 
@@ -2278,10 +2448,12 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     ansichtRendern(true);
     datenLaden(true);
     ladeChatNachrichten();
+    ladeUndZaehleSeitenAufrufe(true);
     setInterval(() => {
         if (document.visibilityState === 'visible') {
             datenLaden(false);
             ladeChatNachrichten();
+            ladeUndZaehleSeitenAufrufe(false);
         }
     }, 5000);
 });
