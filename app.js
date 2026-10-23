@@ -239,6 +239,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             .stamp-executed { background: rgba(127,29,29,0.35); color: #fca5a5; border: 1px dashed #ef4444; }
             .stamp-unsolved { background: rgba(120,53,15,0.35); color: #fde68a; border: 1px dashed #f59e0b; }
             .stamp-prison { background: rgba(39,39,42,0.6); color: #d4d4d8; border: 1px dashed #71717a; }
+            .stamp-alive { background: rgba(30,58,138,0.45); color: #93c5fd; border: 1px dashed #3b82f6; }
 
             /* Mugshot / Avatar */
             .mugshot-box {
@@ -814,7 +815,33 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     // Fest integrierte Original-Fallakten als Sofort-Anzeige & Ausfallschutz
     const STANDARD_FALLAKTEN = [
         {
+            id: 'killer-1792754408243',
+            creatorId: 'creator-1792671162227-hzmm2htb',
+            name: 'Niels Högel',
+            alias: 'Der Krankenpfleger',
+            confirmedVictims: 85,
+            suspectedVictims: '100–300',
+            activePeriod: '1999 - 2005',
+            startYear: 1999,
+            country: 'Deutschland (Wilhelmshaven)',
+            status: 'Lebenslange Haft',
+            skulls: 5,
+            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStXLUv1L5UndcpOG_dq4F5EHKDZn2QNujHLCZQAvyNew&s=10',
+            forensicFact: 'Högel wurde beim Manipulieren der Spritzenpumpe erwischt',
+            submittedBy: 'Roberto',
+            shockCount: 4,
+            viewsCount: 15,
+            tags: ['Patienten', 'Pfleger', 'Krankenhaus'],
+            notes: [],
+            hallmark: 'Er verabreichte Intensivpatienten eigenmächtig und ohne Notwendigkeit tödliche Dosen verschiedener Medikamente. Dieses Verabreichen führte zum Herzstillstand oder massiven Druckabfall bis hin zum vollständigen Kreislaufkollaps.',
+            description: 'Sein Motiv war Geltungssucht und Langeweile. Er wollte vor Kollegen und Ärzten als "Retter" und glänzender Reanimations-Experte dastehen, der selbst in extremen Krisensituationen die Ruhe bewahrt. Konnte er einen Patienten nicht mehr ins Leben zurückholen, nahm er dessen Tod gleichgültig in Kauf. Die geschätzte Opferzahl liegt zwischen 100 - 300 Opfern.',
+            titel: 'Niels Högel – „Der Krankenpfleger“ (85 bestätigte Opfer)',
+            beschreibung: 'WAS IHN AUSMACHTE: Er verabreichte Intensivpatienten eigenmächtig und ohne Notwendigkeit tödliche Dosen verschiedener Medikamente.\n\nFALLAKTE: Sein Motiv war Geltungssucht und Langeweile. Die geschätzte Opferzahl liegt zwischen 100 - 300 Opfern.',
+            datum: 'Ära: 1999 - 2005 | Ort: Deutschland (Wilhelmshaven) | Status: Lebenslange Haft'
+        },
+        {
             id: 'killer-1792738730643',
+            creatorId: 'creator-1792671162227-hzmm2htb',
             name: 'Rodney Alcala',
             alias: 'The Dating Game Killer',
             confirmedVictims: 9,
@@ -1291,10 +1318,25 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         if (s.includes('ungeklärt') || s.includes('nie gefasst') || s.includes('verschwunden')) {
             return { klasse: 'stamp-unsolved', text: '❓ PHANTOM // UNGELÖST' };
         }
-        if (s.includes('hingerichtet') || s.includes('elektrischer') || s.includes('fallbeil') || s.includes('giftspritze')) {
+        if (s.includes('hingerichtet') || s.includes('elektrischer') || s.includes('fallbeil') || s.includes('giftspritze') || s.includes('exekutiert')) {
             return { klasse: 'stamp-executed', text: '⚡ GEFASST // EXEKUTIERT' };
         }
-        return { klasse: 'stamp-prison', text: '🔒 GEFASST // IN HAFT VERSTORBEN' };
+        if (s.includes('lebenslang') || s.includes('sicherungsverwahrung') || s.includes('lebt') || (s.includes('haft') && !s.includes('verstorben') && !s.includes('suizid') && !s.includes('erschlagen') && !s.includes('ermordet'))) {
+            return { klasse: 'stamp-alive', text: '🔒 GEFASST // LEBENSLANGE HAFT' };
+        }
+        if (s.includes('psychiatrie') && !s.includes('verstorben')) {
+            return { klasse: 'stamp-alive', text: '🏥 GESCHLOSSENE PSYCHIATRIE' };
+        }
+        if (s.includes('erschlagen') || s.includes('ermordet')) {
+            return { klasse: 'stamp-prison', text: '⚰️ IN HAFT ERMORDET' };
+        }
+        if (s.includes('suizid')) {
+            return { klasse: 'stamp-prison', text: '⚰️ IN HAFT VERSTORBEN (SUIZID)' };
+        }
+        if (s.includes('psychiatrie') && s.includes('verstorben')) {
+            return { klasse: 'stamp-prison', text: '🏥 IN PSYCHIATRIE VERSTORBEN' };
+        }
+        return { klasse: 'stamp-prison', text: '⚰️ GEFASST // IN HAFT VERSTORBEN' };
     }
 
     function extrahiereEintraege(resBody) {
@@ -1583,9 +1625,10 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 </div>
             </div>
 
-            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;background:#0b090b;border:1px solid #2b1619;padding:12px;border-radius:10px;margin-bottom:16px;font-size:0.82rem;">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0b090b;border:1px solid #2b1619;padding:12px;border-radius:10px;margin-bottom:16px;font-size:0.82rem;">
                 <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Tatort / Region</span><strong style="color:#eee;">📍 ${land}</strong></div>
                 <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Aktive Jahre</span><strong style="color:#eee;">⏱ ${zeitraum}</strong></div>
+                <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Status / Schicksal</span><strong style="color:#93c5fd;">⚖️ ${escapeHtml(eintrag.status || 'Unbekannt')}</strong></div>
                 <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Dunkelziffer / Vermutet</span><strong style="color:#f87171;">🩸 ${vermutet}</strong></div>
             </div>
 
@@ -1840,6 +1883,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                     <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
                         <span style="font-size:0.72rem;padding:3px 8px;border-radius:5px;background:#1c181c;border:1px solid #2e262e;color:#ccc;">📍 ${land}</span>
                         <span style="font-size:0.72rem;padding:3px 8px;border-radius:5px;background:#1c181c;border:1px solid #2e262e;color:#ccc;">⏱ ${zeitraum}</span>
+                        <span style="font-size:0.72rem;padding:3px 8px;border-radius:5px;background:#181a20;border:1px solid #263142;color:#93c5fd;">⚖️ ${escapeHtml(eintrag.status || 'Unbekannt')}</span>
                         <span style="font-size:0.7rem;padding:3px 8px;border-radius:5px;background:#181418;border:1px solid #2a202a;color:#999;">👤 ${eingereichtVon}</span>
                         ${eigener ? `<span style="font-size:0.7rem;padding:3px 8px;border-radius:5px;background:rgba(16,185,129,0.18);border:1px solid #10b981;color:#6ee7b7;font-weight:700;">✨ Dein Beitrag</span>` : ''}
                     </div>
