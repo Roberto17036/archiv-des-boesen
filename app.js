@@ -243,8 +243,8 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
 
             /* Mugshot / Avatar */
             .mugshot-box {
-                width: 52px;
-                height: 52px;
+                width: 56px;
+                height: 56px;
                 border-radius: 10px;
                 background: #1a1113;
                 border: 1px solid #5c1d24;
@@ -254,12 +254,83 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 overflow: hidden;
                 flex-shrink: 0;
                 position: relative;
+                cursor: pointer;
+                transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            }
+            .mugshot-box:hover {
+                transform: scale(1.1);
+                border-color: #ef4444;
+                box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
             }
             .mugshot-box img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                filter: grayscale(85%) contrast(125%);
+                filter: grayscale(65%) contrast(120%);
+                transition: filter 0.2s ease;
+            }
+            .mugshot-box:hover img {
+                filter: grayscale(0%) contrast(105%);
+            }
+
+            /* Großes Foto in der geöffneten Fallakte */
+            .dossier-photo-showcase {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: radial-gradient(circle at center, #1f1216 0%, #0b080b 100%);
+                border: 1px solid #3d1b20;
+                border-radius: 12px;
+                padding: 14px;
+                margin-bottom: 16px;
+                position: relative;
+            }
+            .dossier-photo-showcase img {
+                max-width: 100%;
+                max-height: 340px;
+                width: auto;
+                height: auto;
+                object-fit: contain;
+                border-radius: 8px;
+                border: 2px solid #7f1d1d;
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.85);
+                cursor: zoom-in;
+                transition: transform 0.2s ease, border-color 0.2s ease;
+            }
+            .dossier-photo-showcase img:hover {
+                transform: scale(1.02);
+                border-color: #ef4444;
+            }
+            .dossier-photo-caption {
+                margin-top: 8px;
+                font-size: 0.72rem;
+                color: #fca5a5;
+                font-family: monospace;
+                letter-spacing: 0.5px;
+            }
+
+            /* Vollbild-Lightbox beim Klick auf das große Foto */
+            .image-lightbox-backdrop {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.94);
+                backdrop-filter: blur(8px);
+                z-index: 10005;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                cursor: zoom-out;
+            }
+            .image-lightbox-backdrop.hidden { display: none !important; }
+            .image-lightbox-backdrop img {
+                max-width: 92vw;
+                max-height: 82vh;
+                object-fit: contain;
+                border: 2px solid #ef4444;
+                border-radius: 10px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.95), 0 0 35px rgba(220,38,38,0.35);
             }
 
             /* Tag-Pills auf Karte */
@@ -715,6 +786,20 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 modal.classList.add('hidden');
             }
         });
+    }
+
+    // Vollbild-Foto-Lightbox im Body anlegen
+    if (!document.getElementById('image-lightbox-modal')) {
+        const lightbox = document.createElement('div');
+        lightbox.id = 'image-lightbox-modal';
+        lightbox.className = 'image-lightbox-backdrop hidden';
+        lightbox.innerHTML = `
+            <img id="lightbox-full-img" src="" alt="Fahndungsfoto Vollbild">
+            <div id="lightbox-full-caption" style="margin-top:12px;color:#fff;font-size:0.95rem;font-weight:700;text-align:center;"></div>
+            <button type="button" id="lightbox-close-btn" style="margin-top:12px;width:auto;background:#991b1b;color:#fff;border:1px solid #ef4444;padding:8px 18px;border-radius:8px;font-weight:700;cursor:pointer;">✕ Vollbild schließen</button>
+        `;
+        document.body.appendChild(lightbox);
+        lightbox.addEventListener('click', () => lightbox.classList.add('hidden'));
     }
 
     // =========================================================================
@@ -1608,6 +1693,14 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         const eingereichtVon = escapeHtml(eintrag.submittedBy || 'Forensik-Archiv');
         const darfDirektBearbeiten = istAdminAktiv || istEigenerBeitrag(eintrag);
 
+        const groessesFotoHtml = eintrag.imageUrl
+            ? `
+            <div class="dossier-photo-showcase">
+                <img id="modal-large-photo" src="${escapeHtml(eintrag.imageUrl)}" alt="Fahndungsfoto ${name}" title="Klicken für Vollbild-Ansicht" onerror="this.parentElement.style.display='none'">
+                <span class="dossier-photo-caption">🔍 FAHNDUNGSFOTO // BEWEISAUFNAHME (Bild anklicken für Vollbild-Zoom)</span>
+            </div>`
+            : '';
+
         content.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:1px solid #38181c;padding-bottom:16px;margin-bottom:18px;">
                 <div>
@@ -1624,6 +1717,8 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                     <span style="font-size:0.68rem;text-transform:uppercase;color:#fca5a5;">Bestätigte Opfer</span>
                 </div>
             </div>
+
+            ${groessesFotoHtml}
 
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0b090b;border:1px solid #2b1619;padding:12px;border-radius:10px;margin-bottom:16px;font-size:0.82rem;">
                 <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Tatort / Region</span><strong style="color:#eee;">📍 ${land}</strong></div>
@@ -1690,6 +1785,17 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         `;
 
         modal.classList.remove('hidden');
+
+        document.getElementById('modal-large-photo')?.addEventListener('click', () => {
+            const lb = document.getElementById('image-lightbox-modal');
+            const lbImg = document.getElementById('lightbox-full-img');
+            const lbCap = document.getElementById('lightbox-full-caption');
+            if (lb && lbImg && eintrag.imageUrl) {
+                lbImg.src = eintrag.imageUrl;
+                if (lbCap) lbCap.textContent = `${eintrag.name || ''} – „${eintrag.alias || 'Fallakte'}“`;
+                lb.classList.remove('hidden');
+            }
+        });
 
         document.getElementById('modal-close-btn')?.addEventListener('click', () => modal.classList.add('hidden'));
         document.getElementById('modal-edit-btn')?.addEventListener('click', () => {
@@ -1846,8 +1952,8 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             const darfDirektBearbeiten = istAdminAktiv || eigener;
 
             const mugshotHtml = eintrag.imageUrl
-                ? `<div class="mugshot-box"><img src="${escapeHtml(eintrag.imageUrl)}" alt="${name}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem;\\'>🕵️</span>'"></div>`
-                : `<div class="mugshot-box" title="Forensisches Dossier-Profil">
+                ? `<div class="mugshot-box btn-open-dossier" data-index="${index}" title="Klicken, um Akte & großes Foto zu öffnen"><img src="${escapeHtml(eintrag.imageUrl)}" alt="${name}" onerror="this.outerHTML='<span style=\\'font-size:1.5rem;\\'>🕵️</span>'"></div>`
+                : `<div class="mugshot-box btn-open-dossier" data-index="${index}" title="Forensisches Dossier-Profil öffnen">
                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="1.6">
                        <path d="M12 2C7.03 2 3 6.03 3 11c0 3.32 1.8 6.22 4.47 7.78V21a1 1 0 001 1h7.06a1 1 0 001-1v-2.22C19.2 17.22 21 14.32 21 11c0-4.97-4.03-9-9-9zM9 12a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm6 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3zM10 17v3M14 17v3"/>
                      </svg>
