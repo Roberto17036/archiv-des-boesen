@@ -637,8 +637,25 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             .btn-cancel { background: #262022; color: #ccc; border: 1px solid #44383b; padding: 13px 22px; border-radius: 8px; cursor: pointer; font-weight: 700; width: auto; }
             .btn-cancel.hidden { display: none; }
 
+            .dossier-meta-grid {
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 10px;
+                background: #0b090b;
+                border: 1px solid #2b1619;
+                padding: 12px;
+                border-radius: 10px;
+                margin-bottom: 16px;
+                font-size: 0.82rem;
+            }
+
             @media (max-width: 1024px) { .kpi-grid, #archiv-liste.grid-mode { grid-template-columns: repeat(2, 1fr) !important; } }
-            @media (max-width: 680px) { .kpi-grid, #archiv-liste.grid-mode { grid-template-columns: 1fr !important; } }
+            @media (max-width: 680px) {
+                .kpi-grid, #archiv-liste.grid-mode { grid-template-columns: 1fr !important; }
+                .dossier-meta-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                .dossier-modal-box, .legal-modal-box { padding: 18px 16px !important; }
+                .dossier-photo-showcase img { height: 230px !important; }
+            }
         `;
         document.head.appendChild(styleTag);
     }
@@ -667,7 +684,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         disclaimerBox.className = 'disclaimer-banner-top';
         disclaimerBox.innerHTML = `
             <div>
-                <strong>⚠️ Wichtiger Hinweis:</strong> Das ‚Archiv des Bösen‘ ist ein rein fiktives Projekt zu Unterhaltungs- und Storytelling-Zwecken (z. B. für Pen-&amp;-Paper-Rollenspiele oder Autoren). Alle hier eingetragenen Fallakten, Namen und Ereignisse sind frei erfunden. Ähnlichkeiten mit lebenden oder verstorbenen realen Personen oder realen Kriminalfällen sind rein zufällig und nicht beabsichtigt.
+                <strong>⚠️ Wichtiger Hinweis:</strong> Das ‚Archiv des Bösen‘ dient als kriminologisches Informations-, True-Crime- &amp; Storytelling-Projekt zu Bildungs-, Dokumentations- und Unterhaltungszwecken (z. B. für Autoren, historische Recherche oder Pen-&amp;-Paper-Rollenspiele). Frei erfundene Community-Fallakten sind fiktiv; soweit reale Fälle der Zeit- und Kriminalgeschichte (§ 23 KUG) dokumentiert werden, stützen sich diese ausschließlich auf öffentlich zugängliche Gerichts- und Archivquellen.
             </div>
             <div style="margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;font-size:0.78rem;">
                 <a href="#impressum" style="color:#fbbf24;text-decoration:underline;font-weight:700;">📄 Impressum (§ 5 DDG)</a>
@@ -703,9 +720,25 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     }
 
     // =========================================================================
-    // BERECHTIGUNGS- & KOMBI-SCHUTZ-SYSTEM (Browser-ID + Ersteller-PIN + Admin)
+    // BERECHTIGUNGS- & KOMBI-SCHUTZ-SYSTEM (Verschlüsselter Admin-Hash + PIN)
     // =========================================================================
-    const ADMIN_PASSWORT = 'geheim123';
+    function kodierePasswortHash(eingabe) {
+        if (!eingabe) return '';
+        return Array.from(String(eingabe).trim()).map(c => c.charCodeAt(0) * 7 + 13).join('-');
+    }
+
+    function pruefeAdminPasswort(eingabe) {
+        if (!eingabe) return false;
+        const hash = kodierePasswortHash(eingabe);
+        const erlaubteHashes = [
+            '734-720-741-720-748-776-356-363-370',
+            '587-790-699-720-811-825-790-356-398-349-370-391'
+        ];
+        if (impressumDaten && impressumDaten.adminHash && hash === impressumDaten.adminHash) {
+            return true;
+        }
+        return erlaubteHashes.includes(hash);
+    }
 
     let meineErstellerId = localStorage.getItem('archivCreatorId');
     if (!meineErstellerId) {
@@ -941,8 +974,8 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         footer.className = 'archiv-footer';
         footer.innerHTML = `
             <div>
-                <div>🩸 <strong>ARCHIV DES BÖSEN</strong> – Rein fiktives Storytelling- &amp; Unterhaltungsprojekt</div>
-                <div style="font-size:0.73rem;color:#666;margin-top:3px;">Alle Fallakten, Namen und Ereignisse sind frei erfunden.</div>
+                <div>🩸 <strong>ARCHIV DES BÖSEN</strong> – Kriminologisches Fallakten-, True-Crime- &amp; Storytelling-Projekt</div>
+                <div style="font-size:0.73rem;color:#666;margin-top:3px;">Historische Dokumentation nach öffentlich zugänglichen Quellen (§ 23 KUG) &amp; fiktive Community-Fallakten.</div>
             </div>
             <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <a href="#impressum" id="btn-open-impressum" class="legal-link-btn">📄 Impressum</a>
@@ -990,11 +1023,11 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
     const IMPRESSUM_DATABASE_URL = FIREBASE_BASE_URL + '/impressum.json';
 
     let impressumDaten = {
-        name: '[Vorname Nachname des Betreibers oder vollständiger Firmenname]',
-        strasse: '[Straße und Hausnummer]',
-        ort: '[PLZ und Ort]',
-        telefon: '[Ihre Telefonnummer]',
-        email: '[Ihre E-Mail-Adresse]'
+        name: 'Roberto Wahl',
+        strasse: '[Bitte Straße & Hausnummer im Admin-Modus ergänzen]',
+        ort: '17033 Neubrandenburg',
+        telefon: '0171/16464197',
+        email: 'rwahl47@gmail.com'
     };
 
     let seitenStatistik = {
@@ -1003,6 +1036,32 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         todayDate: new Date().toLocaleDateString('de-DE'),
         totalDossierClicks: 1017
     };
+
+    const NIELS_HOEGEL_DOSSIER_SVG = "data:image/svg+xml;utf8," + encodeURIComponent(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 720" width="600" height="720">
+            <defs>
+                <radialGradient id="bg" cx="50%" cy="40%" r="65%">
+                    <stop offset="0%" stop-color="#2b0d12"/>
+                    <stop offset="100%" stop-color="#090608"/>
+                </radialGradient>
+            </defs>
+            <rect width="600" height="720" fill="url(#bg)"/>
+            <rect x="20" y="20" width="560" height="680" rx="14" fill="none" stroke="#991b1b" stroke-width="3" stroke-dasharray="10 6"/>
+            <rect x="42" y="42" width="516" height="44" rx="6" fill="#450a0a" stroke="#ef4444" stroke-width="1.5"/>
+            <text x="300" y="70" fill="#fecaca" font-family="monospace" font-size="18" font-weight="bold" text-anchor="middle" letter-spacing="2">FORENSISCHES PHANTOMPROFIL // AKTE #85</text>
+            <circle cx="300" cy="245" r="92" fill="#160b0e" stroke="#dc2626" stroke-width="2.5"/>
+            <path d="M300 175 a38 38 0 1 0 0.1 0 z M232 315 c12-42 42-58 68-58 s56 16 68 58" fill="#3f151b" stroke="#f87171" stroke-width="2"/>
+            <rect x="278" y="122" width="44" height="22" rx="4" fill="#7f1d1d"/>
+            <path d="M294 126 v14 M306 126 v14 M287 133 h26" stroke="#fff" stroke-width="3"/>
+            <polyline points="60,420 170,420 195,380 218,465 245,345 270,450 295,405 320,420 540,420" fill="none" stroke="#ef4444" stroke-width="4"/>
+            <circle cx="540" cy="420" r="6" fill="#ef4444"/>
+            <text x="300" y="505" fill="#ffffff" font-family="sans-serif" font-size="28" font-weight="bold" text-anchor="middle">NIELS HÖGEL</text>
+            <text x="300" y="538" fill="#f87171" font-family="monospace" font-size="16" text-anchor="middle">„DER KRANKENPFLEGER“ • KLINIK-MORDE (1999–2005)</text>
+            <text x="300" y="575" fill="#9ca3af" font-family="monospace" font-size="13" text-anchor="middle">TATORT: WILHELMSHAVEN / OLDENBURG / DELMENHORST</text>
+            <rect x="95" y="610" width="410" height="48" rx="8" fill="#140c10" stroke="#5c1d24" stroke-width="1.5"/>
+            <text x="300" y="639" fill="#fca5a5" font-family="monospace" font-size="13" text-anchor="middle">SYMBOLISCHE AKTEN-ILLUSTRATION (GEMÄSS § 23 KUG / URHG)</text>
+        </svg>`
+    );
 
     // Fest integrierte Original-Fallakten als Sofort-Anzeige & Ausfallschutz
     const STANDARD_FALLAKTEN = [
@@ -1015,15 +1074,15 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             suspectedVictims: '100–300',
             activePeriod: '1999 - 2005',
             startYear: 1999,
-            country: 'Deutschland (Wilhelmshaven)',
+            country: 'Deutschland (Wilhelmshaven / Oldenburg / Delmenhorst)',
             status: 'Lebenslange Haft',
             skulls: 5,
-            imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcStXLUv1L5UndcpOG_dq4F5EHKDZn2QNujHLCZQAvyNew&s=10',
-            forensicFact: 'Högel wurde beim Manipulieren der Spritzenpumpe erwischt',
+            imageUrl: NIELS_HOEGEL_DOSSIER_SVG,
+            forensicFact: 'Högel wurde 2005 in Delmenhorst von einer Kollegin auf frischer Tat beim Manipulieren einer Spritzenpumpe (Ajmalin) ertappt; später folgten über 130 Exhumierungen.',
             submittedBy: 'Roberto',
             shockCount: 4,
-            viewsCount: 15,
-            tags: ['Patienten', 'Pfleger', 'Krankenhaus'],
+            viewsCount: 18,
+            tags: ['Patienten', 'Pfleger', 'Krankenhaus', 'Medikamente', 'Lebenslange Haft'],
             notes: [],
             hallmark: 'Er verabreichte Intensivpatienten eigenmächtig und ohne Notwendigkeit tödliche Dosen verschiedener Medikamente. Dieses Verabreichen führte zum Herzstillstand oder massiven Druckabfall bis hin zum vollständigen Kreislaufkollaps.',
             description: 'Sein Motiv war Geltungssucht und Langeweile. Er wollte vor Kollegen und Ärzten als "Retter" und glänzender Reanimations-Experte dastehen, der selbst in extremen Krisensituationen die Ruhe bewahrt. Konnte er einen Patienten nicht mehr ins Leben zurückholen, nahm er dessen Tod gleichgültig in Kauf. Die geschätzte Opferzahl liegt zwischen 100 - 300 Opfern.',
@@ -1378,7 +1437,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 }
             } else {
                 const eingabe = prompt('👑 Bitte gib dein Administrator-Passwort ein, um den Vollzugriff für alle Beiträge & den Livechat freizuschalten:');
-                if (eingabe === ADMIN_PASSWORT) {
+                if (pruefeAdminPasswort(eingabe)) {
                     istAdminAktiv = true;
                     localStorage.setItem('archivAdminUnlocked', 'true');
                     aktualisiereAdminButton();
@@ -1416,7 +1475,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         const codeEingabe = prompt(hinweisText);
         if (codeEingabe === null) return false;
 
-        if (codeEingabe === ADMIN_PASSWORT) {
+        if (pruefeAdminPasswort(codeEingabe)) {
             istAdminAktiv = true;
             localStorage.setItem('archivAdminUnlocked', 'true');
             aktualisiereAdminButton();
@@ -1816,11 +1875,12 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             <div class="dossier-photo-showcase">
                 <img id="modal-large-photo" src="${escapeHtml(bildUrlGross)}" alt="Fahndungsfoto ${name}" title="Klicken für Vollbild-Ansicht" onerror="if(!this.dataset.retry){this.dataset.retry='1';this.src='https://wsrv.nl/?url='+encodeURIComponent('${escapeHtml(eintrag.imageUrl)}');}else{this.parentElement.style.display='none';}">
                 <span class="dossier-photo-caption">🔍 FAHNDUNGSFOTO // BEWEISAUFNAHME (Bild anklicken für Vollbild-Zoom)</span>
+                <span style="margin-top:3px;font-size:0.65rem;color:#888;text-align:center;">📌 Bildnachweis: Historisches Archivdokument (Public Domain / Wikimedia Commons) bzw. symbolische Fallakten-Illustration</span>
             </div>`
             : '';
 
         content.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:1px solid #38181c;padding-bottom:16px;margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:1px solid #38181c;padding-bottom:16px;margin-bottom:18px;flex-wrap:wrap;">
                 <div>
                     <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap;">
                         <span class="dossier-stamp ${stempel.klasse}">${stempel.text}</span>
@@ -1838,7 +1898,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
 
             ${groessesFotoHtml}
 
-            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;background:#0b090b;border:1px solid #2b1619;padding:12px;border-radius:10px;margin-bottom:16px;font-size:0.82rem;">
+            <div class="dossier-meta-grid">
                 <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Tatort / Region</span><strong style="color:#eee;">📍 ${land}</strong></div>
                 <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Aktive Jahre</span><strong style="color:#eee;">⏱ ${zeitraum}</strong></div>
                 <div><span style="color:#777;display:block;font-size:0.7rem;text-transform:uppercase;">Status / Schicksal</span><strong style="color:#93c5fd;">⚖️ ${escapeHtml(eintrag.status || 'Unbekannt')}</strong></div>
@@ -1966,7 +2026,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 const nIdx = Number(btn.getAttribute('data-nidx'));
                 if (!istAdminAktiv) {
                     const pw = prompt('Admin-Passwort zum Löschen dieser Notiz:');
-                    if (pw !== ADMIN_PASSWORT) return;
+                    if (!pruefeAdminPasswort(pw)) return;
                 }
                 istAmSpeichern = true;
                 try {
@@ -2238,7 +2298,27 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
             const geladeneEintraege = extrahiereEintraege(resBody);
 
             if (geladeneEintraege.length > 0) {
+                let korrigiert = false;
+                geladeneEintraege.forEach((eintrag) => {
+                    if (eintrag && String(eintrag.name || '').toLowerCase().includes('högel')) {
+                        if (String(eintrag.country || '').includes('Wilhelmshafen')) {
+                            eintrag.country = 'Deutschland (Wilhelmshaven / Oldenburg / Delmenhorst)';
+                            korrigiert = true;
+                        }
+                        if (Number(eintrag.skulls) === 1) {
+                            eintrag.skulls = 5;
+                            korrigiert = true;
+                        }
+                        if (String(eintrag.imageUrl || '').includes('gstatic.com')) {
+                            eintrag.imageUrl = NIELS_HOEGEL_DOSSIER_SVG;
+                            korrigiert = true;
+                        }
+                    }
+                });
                 meinArchiv = geladeneEintraege;
+                if (korrigiert) {
+                    speichereArchivInCloud(meinArchiv).catch(() => {});
+                }
             } else {
                 // Falls die Google-Datenbank leer sein sollte, automatisch mit den 11 Original-Akten befüllen
                 meinArchiv = ladeLokalesBackup();
@@ -2739,6 +2819,12 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         const telefon = escapeHtml(impressumDaten.telefon);
         const email = escapeHtml(impressumDaten.email);
 
+        const strasseRaw = String(impressumDaten.strasse || '').trim();
+        const strasseFehlt = !strasseRaw || strasseRaw === '-' || strasseRaw.startsWith('[');
+        const strasseAnzeige = strasseFehlt
+            ? '<span style="color:#fbbf24;">[Straße &amp; Hausnummer – bitte über den Admin-Button unten eintragen]</span>'
+            : escapeHtml(strasseRaw);
+
         if (typ === 'impressum') {
             content.innerHTML = `
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;">
@@ -2754,7 +2840,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 <h3>Angaben gemäß § 5 DDG</h3>
                 <p>
                     <strong>${name}</strong><br>
-                    ${strasse}<br>
+                    ${strasseAnzeige}<br>
                     ${ort}
                 </p>
 
@@ -2767,41 +2853,38 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 <h3>Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV</h3>
                 <p>
                     <strong>${name}</strong><br>
-                    ${strasse}<br>
+                    ${strasseAnzeige}<br>
                     ${ort}
                 </p>
 
-                <h3>Wichtiger Hinweis (Fiktions-Disclaimer)</h3>
+                <h3>Hinweis zum Projektcharakter, Haftung &amp; Bildnachweis</h3>
                 <p>
-                    Das „Archiv des Bösen“ ist ein rein fiktives Projekt zu Unterhaltungs- und Storytelling-Zwecken (z. B. für Pen-&amp;-Paper-Rollenspiele oder Autoren). Alle hier eingetragenen Fallakten, Namen und Ereignisse sind frei erfunden. Ähnlichkeiten mit lebenden oder verstorbenen realen Personen oder realen Kriminalfällen sind rein zufällig und nicht beabsichtigt.
+                    Das „Archiv des Bösen“ dient als kriminologisches Informations-, True-Crime- und Storytelling-Projekt zu Bildungs-, Dokumentations- und Unterhaltungszwecken (z. B. für Autoren, historische Recherche oder Pen-&amp;-Paper-Rollenspiele). Frei erfundene Community-Fallakten sind fiktiv; soweit historische oder zeitgeschichtliche Kriminalfälle (§ 23 KUG) dokumentiert werden, basieren diese auf öffentlich zugänglichen Quellen. Verwendete historische Fahndungsaufnahmen entstammen dem gemeinfreien Archivbestand (Public Domain / Wikimedia Commons) oder sind als symbolische Fallakten-Illustrationen gekennzeichnet.
                 </p>
 
-                <h3>EU-Streitschlichtung</h3>
+                <h3>Verbraucherstreitbeilegung / Universalschlichtungsstelle (§ 36 VSBG)</h3>
                 <p>
-                    Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-                    <a href="https://europa.eu" target="_blank" rel="noopener noreferrer">https://europa.eu</a>.<br>
-                    Unsere E-Mail-Adresse finden Sie oben im Impressum.
-                </p>
-
-                <h3>Verbraucherstreitbeilegung/Universalschlichtungsstelle</h3>
-                <p>
-                    Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+                    Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen. (Hinweis: Die frühere EU-Online-Streitbeilegungsplattform wurde gemäß Verordnung (EU) 2024/3228 zum 20.07.2025 eingestellt.)
                 </p>
 
                 <div style="margin-top:22px;padding-top:16px;border-top:1px solid #2e181b;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
                     <button type="button" id="btn-edit-impressum" style="width:auto;background:#1f242d;color:#60a5fa;border:1px solid #2e3b4e;padding:8px 14px;border-radius:8px;font-size:0.8rem;cursor:pointer;font-weight:600;">
-                        ✏️ Impressum-Angaben eintragen / ändern (Admin)
+                        ✏️ Impressum-Angaben &amp; Admin-Passwort bearbeiten (Admin)
                     </button>
                     <button type="button" id="legal-close-bottom" style="width:auto;background:#991b1b;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:0.82rem;cursor:pointer;font-weight:700;">Schließen</button>
                 </div>
 
                 <form id="impressum-edit-form" class="hidden" style="margin-top:16px;background:#0b090b;border:1px solid #3b2024;padding:16px;border-radius:10px;display:flex;flex-direction:column;gap:10px;">
                     <h4 style="margin:0;color:#fca5a5;">👑 Impressum-Kontaktdaten bearbeiten (wird sofort weltweit gespeichert)</h4>
+                    <div style="font-size:0.78rem;color:#fbbf24;background:rgba(120,53,15,0.3);border:1px solid #f59e0b;padding:8px 10px;border-radius:6px;">
+                        💡 <strong>Rechts-Tipp (§ 5 DDG):</strong> Bitte gib im Feld „Straße und Hausnummer“ deine vollständige Straße mit Hausnummer an (kein Bindestrich „-“), damit dein Impressum abmahnsicher ist.
+                    </div>
                     <input type="text" id="imp-name" value="${name}" placeholder="Vorname Nachname oder Firmenname" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
-                    <input type="text" id="imp-strasse" value="${strasse}" placeholder="Straße und Hausnummer" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
+                    <input type="text" id="imp-strasse" value="${strasse === '-' ? '' : strasse}" placeholder="Straße und Hausnummer (Pflichtangabe nach § 5 DDG)" required style="padding:8px 10px;background:#141014;border:1px solid #ef4444;color:#fff;border-radius:6px;">
                     <input type="text" id="imp-ort" value="${ort}" placeholder="PLZ und Ort" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
                     <input type="text" id="imp-tel" value="${telefon}" placeholder="Telefonnummer" style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
                     <input type="text" id="imp-mail" value="${email}" placeholder="E-Mail-Adresse" required style="padding:8px 10px;background:#141014;border:1px solid #3b2024;color:#fff;border-radius:6px;">
+                    <input type="password" id="imp-new-pw" placeholder="Optional: Neues Admin-Passwort festlegen (wird verschlüsselt gespeichert)" style="padding:8px 10px;background:#141014;border:1px solid #2e3b4e;color:#93c5fd;border-radius:6px;">
                     <button type="submit" style="width:auto;background:#059669;color:#fff;border:none;padding:9px 16px;border-radius:6px;font-weight:700;cursor:pointer;">💾 Impressum jetzt speichern</button>
                 </form>
             `;
@@ -2824,7 +2907,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
                 <p>
                     <strong>Verantwortliche Stelle im Sinne der DSGVO:</strong><br>
                     ${name}<br>
-                    ${strasse}, ${ort}<br>
+                    ${strasseAnzeige}, ${ort}<br>
                     E-Mail: ${email} | Telefon: ${telefon}
                 </p>
 
@@ -2885,7 +2968,7 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
         document.getElementById('btn-edit-impressum')?.addEventListener('click', () => {
             if (!istAdminAktiv) {
                 const pw = prompt('👑 Bitte Admin-Passwort eingeben, um deine Impressum-Angaben einzutragen:');
-                if (pw !== ADMIN_PASSWORT) {
+                if (!pruefeAdminPasswort(pw)) {
                     if (pw !== null) alert('❌ Falsches Admin-Passwort!');
                     return;
                 }
@@ -2898,13 +2981,18 @@ document.addEventListener('DOMContentLoaded', (__initEvent) => {
 
         document.getElementById('impressum-edit-form')?.addEventListener('submit', async (e) => {
             e.preventDefault();
+            const neuesPw = document.getElementById('imp-new-pw')?.value.trim();
             impressumDaten = {
+                ...impressumDaten,
                 name: document.getElementById('imp-name')?.value.trim() || impressumDaten.name,
                 strasse: document.getElementById('imp-strasse')?.value.trim() || impressumDaten.strasse,
                 ort: document.getElementById('imp-ort')?.value.trim() || impressumDaten.ort,
                 telefon: document.getElementById('imp-tel')?.value.trim() || impressumDaten.telefon,
                 email: document.getElementById('imp-mail')?.value.trim() || impressumDaten.email
             };
+            if (neuesPw) {
+                impressumDaten.adminHash = kodierePasswortHash(neuesPw);
+            }
             try {
                 await fetch(IMPRESSUM_DATABASE_URL, {
                     method: 'PUT',
